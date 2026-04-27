@@ -1,12 +1,25 @@
-// SceneCraft — Anthropic API proxy with Firebase auth + per-user quota.
-// Verifies the caller's Firebase ID token, checks their monthly token quota,
-// streams Anthropic SSE back to the browser, then debits actual usage.
+// SceneCraft — Anthropic API proxy with Firebase auth, tier-based quota, rate limit.
+// Verifies the caller's Firebase ID token, checks their monthly token quota and
+// per-minute request rate, streams Anthropic SSE back to the browser, then debits
+// actual usage on completion.
 
 import admin from 'firebase-admin';
 
 export const config = { runtime: 'nodejs' };
 
-const DEFAULT_MONTHLY_QUOTA = parseInt(process.env.DEFAULT_MONTHLY_QUOTA || '500000', 10);
+// Tier → monthly token allowance. Override per-user by setting
+// users/{uid}.monthlyQuota explicitly, or change tier via the billing webhook.
+const TIER_QUOTAS = {
+  free: parseInt(process.env.FREE_TIER_QUOTA || '50000', 10),
+  pro: parseInt(process.env.PRO_TIER_QUOTA || '2000000', 10),
+  unlimited: 1e12,
+};
+
+// Per-minute request rate limit per user. Stops a single user from issuing
+// hundreds of calls/minute even if they have quota left.
+const RATE_LIMIT_PER_MIN = parseInt(process.env.RATE_LIMIT_PER_MIN || '20', 10);
+
+const REQUIRE_VERIFIED_EMAIL = String(process.env.REQUIRE_VERIFIED_EMAIL || 'true') !== 'false';
 
 let adminApp;
 function getAdmin() {
@@ -22,6 +35,9 @@ function getAdmin() {
 function periodKey(now = new Date()) {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
 }
+function minuteKey(now = new Date()) {
+  return Math.floor(now.getTime() / 60000);
+}
 
 async function verifyAuth(req) {
   const header = req.headers['authorization'] || req.headers['Authorization'];
@@ -32,36 +48,56 @@ async function verifyAuth(req) {
   try {
     getAdmin();
     const decoded = await admin.auth().verifyIdToken(idToken);
-    return { uid: decoded.uid, email: decoded.email || null };
+    if (REQUIRE_VERIFIED_EMAIL && decoded.firebase?.sign_in_provider === 'password' && !decoded.email_verified) {
+      return { error: 'Please verify your email address before using AI features. Check your inbox for the verification link.', status: 403 };
+    }
+    return { uid: decoded.uid, email: decoded.email || null, providers: decoded.firebase?.identities || {} };
   } catch (err) {
     return { error: 'Invalid or expired session: ' + err.message, status: 401 };
   }
+}
+
+function quotaForTier(tier, explicit) {
+  if (typeof explicit === 'number' && explicit > 0) return explicit;
+  return TIER_QUOTAS[tier] ?? TIER_QUOTAS.free;
 }
 
 async function checkAndReserveQuota(uid) {
   const db = admin.firestore();
   const userRef = db.collection('users').doc(uid);
   const period = periodKey();
+  const minute = minuteKey();
 
   return db.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
     const data = snap.exists ? snap.data() : {};
-    const quota = typeof data.monthlyQuota === 'number' ? data.monthlyQuota : DEFAULT_MONTHLY_QUOTA;
+    const tier = data.tier || 'free';
+    const quota = quotaForTier(tier, data.monthlyQuota);
     const used = data.periodKey === period && typeof data.usedThisMonth === 'number' ? data.usedThisMonth : 0;
 
     if (used >= quota) {
-      return { allowed: false, used, quota, period };
+      return { allowed: false, reason: 'quota', used, quota, tier, period };
+    }
+
+    // Per-minute rate limit (sliding window approximation by tracking the
+    // current minute bucket and a count). Resets when the minute key changes.
+    const rateMinute = data.rateMinute === minute ? (data.rateCount || 0) : 0;
+    if (rateMinute >= RATE_LIMIT_PER_MIN) {
+      return { allowed: false, reason: 'rate', used, quota, tier, period, rateLimit: RATE_LIMIT_PER_MIN };
     }
 
     const update = {
-      monthlyQuota: quota,
+      tier,
+      monthlyQuota: data.monthlyQuota || quota,
       periodKey: period,
       usedThisMonth: used,
+      rateMinute: minute,
+      rateCount: rateMinute + 1,
       lastSeenAt: admin.firestore.FieldValue.serverTimestamp(),
     };
     if (!snap.exists) update.createdAt = admin.firestore.FieldValue.serverTimestamp();
     tx.set(userRef, update, { merge: true });
-    return { allowed: true, used, quota, period };
+    return { allowed: true, used, quota, tier, period };
   });
 }
 
@@ -77,6 +113,7 @@ async function debitUsage(uid, period, tokens) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') { res.status(204).end(); return; }
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -102,10 +139,17 @@ export default async function handler(req, res) {
     return;
   }
   if (!quotaCheck.allowed) {
-    res.status(429).json({
-      error: `Monthly token quota reached (${quotaCheck.used}/${quotaCheck.quota}). Resets next month.`,
-      quota: quotaCheck,
-    });
+    if (quotaCheck.reason === 'rate') {
+      res.status(429).json({
+        error: `Slow down — ${quotaCheck.rateLimit} requests/minute is the cap. Try again in a few seconds.`,
+        retryAfterSeconds: 30,
+      });
+    } else {
+      res.status(429).json({
+        error: `Monthly quota reached (${quotaCheck.used.toLocaleString()} / ${quotaCheck.quota.toLocaleString()} tokens on the ${quotaCheck.tier} tier). Resets next month.`,
+        quota: quotaCheck,
+      });
+    }
     return;
   }
 
@@ -164,7 +208,6 @@ export default async function handler(req, res) {
       if (done) break;
       res.write(Buffer.from(value));
 
-      // Sniff usage events (message_start gives input tokens; message_delta gives output tokens).
       leftover += decoder.decode(value, { stream: true });
       const lines = leftover.split('\n');
       leftover = lines.pop() || '';

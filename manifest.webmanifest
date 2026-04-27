@@ -1,0 +1,16 @@
+{
+  "name": "SceneCraft Studio",
+  "short_name": "SceneCraft",
+  "description": "AI-powered screenwriting suite for feature films, TV, documentaries, and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#060610",
+  "theme_color": "#060610",
+  "orientation": "any",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "categories": ["productivity", "writing", "entertainment"]
+}

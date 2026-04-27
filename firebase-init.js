@@ -7,11 +7,12 @@ import {
   getAuth, onAuthStateChanged,
   GoogleAuthProvider, signInWithPopup,
   signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  sendPasswordResetEmail, signOut,
+  sendPasswordResetEmail, sendEmailVerification, signOut,
   setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp
+  getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, serverTimestamp,
+  collection, getDocs, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const cfg = window.__FIREBASE_CONFIG__;
@@ -30,12 +31,13 @@ if (isConfigured) {
 const authListeners = new Set();
 let currentUser = null;
 let currentQuota = null;
+let currentTier = null;
 let quotaUnsub = null;
 let resolved = false;
 
 function notifyAuth() {
   for (const cb of authListeners) {
-    try { cb(currentUser, currentQuota); } catch {}
+    try { cb(currentUser, currentQuota, currentTier); } catch {}
   }
 }
 
@@ -47,21 +49,24 @@ if (isConfigured) {
       const ref = doc(db, "users", user.uid);
       quotaUnsub = onSnapshot(ref, (snap) => {
         const data = snap.exists() ? snap.data() : null;
+        currentTier = data?.tier || 'free';
         currentQuota = data ? {
           used: data.usedThisMonth || 0,
-          quota: data.monthlyQuota || 500000,
+          quota: data.monthlyQuota || 50000,
           period: data.periodKey || null,
-        } : { used: 0, quota: 500000, period: null };
+          tier: currentTier,
+          emailVerified: user.emailVerified,
+        } : { used: 0, quota: 50000, period: null, tier: 'free', emailVerified: user.emailVerified };
         notifyAuth();
       }, () => { currentQuota = null; notifyAuth(); });
     } else {
       currentQuota = null;
+      currentTier = null;
     }
     resolved = true;
     notifyAuth();
   });
 } else {
-  // Not configured: resolve immediately so callers don't wait forever.
   resolved = true;
 }
 
@@ -76,7 +81,8 @@ async function signInEmail(email, password) {
 }
 async function signUpEmail(email, password) {
   if (!isConfigured) throw new Error("Firebase is not configured.");
-  await createUserWithEmailAndPassword(auth, email, password);
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try { await sendEmailVerification(cred.user); } catch {}
 }
 async function resetPassword(email) {
   if (!isConfigured) throw new Error("Firebase is not configured.");
@@ -86,28 +92,73 @@ async function signOutUser() {
   if (!isConfigured) return;
   await signOut(auth);
 }
-async function getIdToken() {
+async function resendVerification() {
+  if (!isConfigured || !currentUser) throw new Error("Not signed in.");
+  await sendEmailVerification(currentUser);
+}
+async function reloadUser() {
+  if (!currentUser) return;
+  await currentUser.reload();
+  // reload mutates the existing user object; nudge subscribers.
+  notifyAuth();
+}
+async function getIdToken(forceRefresh = false) {
   if (!currentUser) return null;
-  return currentUser.getIdToken();
+  return currentUser.getIdToken(forceRefresh);
 }
 
-// ── Firestore-backed drafts ──
-// Per-user single active draft at users/{uid}/state/draft.
-// (Multi-draft support can layer on top later.)
-function draftRef() {
+// ── Multi-draft Firestore API ──
+function draftsCol() {
   if (!currentUser) return null;
-  return doc(db, "users", currentUser.uid, "state", "draft");
+  return collection(db, "users", currentUser.uid, "drafts");
 }
-async function saveDraftRemote(payload) {
-  const ref = draftRef();
-  if (!ref) return;
+function draftDoc(id) {
+  if (!currentUser) return null;
+  return doc(db, "users", currentUser.uid, "drafts", id);
+}
+function activeRef() {
+  if (!currentUser) return null;
+  return doc(db, "users", currentUser.uid, "state", "active");
+}
+function newId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+async function listDrafts() {
+  const c = draftsCol(); if (!c) return [];
+  const snap = await getDocs(query(c, orderBy("updatedAt", "desc")));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+async function getDraft(id) {
+  const ref = draftDoc(id); if (!ref) return null;
+  const snap = await getDoc(ref);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+async function saveDraft(id, payload) {
+  const ref = draftDoc(id); if (!ref) return;
   await setDoc(ref, { ...payload, updatedAt: serverTimestamp() }, { merge: true });
 }
-async function loadDraftRemote() {
-  const ref = draftRef();
-  if (!ref) return null;
+async function createDraft(payload) {
+  const id = newId();
+  const ref = draftDoc(id); if (!ref) return null;
+  await setDoc(ref, { ...payload, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  return id;
+}
+async function renameDraft(id, title) {
+  const ref = draftDoc(id); if (!ref) return;
+  await setDoc(ref, { title, updatedAt: serverTimestamp() }, { merge: true });
+}
+async function deleteDraft(id) {
+  const ref = draftDoc(id); if (!ref) return;
+  await deleteDoc(ref);
+}
+async function setActiveDraft(id) {
+  const ref = activeRef(); if (!ref) return;
+  await setDoc(ref, { id, updatedAt: serverTimestamp() }, { merge: true });
+}
+async function getActiveDraft() {
+  const ref = activeRef(); if (!ref) return null;
   const snap = await getDoc(ref);
-  return snap.exists() ? snap.data() : null;
+  return snap.exists() ? snap.data().id || null : null;
 }
 
 // ── Public API ──
@@ -115,19 +166,28 @@ window.SC = {
   configured: isConfigured,
   // auth
   signInGoogle, signInEmail, signUpEmail, resetPassword, signOut: signOutUser,
+  resendVerification, reloadUser,
   getIdToken,
   getCurrentUser: () => currentUser,
   getQuota: () => currentQuota,
+  getTier: () => currentTier,
+  isResolved: () => resolved,
   onAuth: (cb) => {
     authListeners.add(cb);
-    // Only fire immediately if we already know the auth state. Otherwise wait
-    // for the first onAuthStateChanged event so subscribers don't act on a
-    // premature null when the user actually has a restored session.
-    if (resolved) cb(currentUser, currentQuota);
+    if (resolved) cb(currentUser, currentQuota, currentTier);
     return () => authListeners.delete(cb);
   },
   // drafts
-  saveDraftRemote, loadDraftRemote,
+  drafts: {
+    list: listDrafts,
+    get: getDraft,
+    save: saveDraft,
+    create: createDraft,
+    rename: renameDraft,
+    delete: deleteDraft,
+    setActive: setActiveDraft,
+    getActive: getActiveDraft,
+  },
 };
 
 window.dispatchEvent(new Event("sc:ready"));

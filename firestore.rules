@@ -4,30 +4,44 @@ rules_version = '2';
 // Deploy with:  firebase deploy --only firestore:rules
 //
 // Model:
-//   users/{uid}                    — user profile + monthly quota counters
-//   users/{uid}/state/draft        — the user's active draft (cloud-synced)
+//   users/{uid}                          — user profile, tier, monthly quota counters
+//   users/{uid}/state/{docId}            — singletons (e.g. activeDraftId)
+//   users/{uid}/drafts/{draftId}         — saved scripts
 //
-// Quota fields (usedThisMonth, monthlyQuota, periodKey) are written ONLY by the
-// server-side proxy via firebase-admin. Clients can read but not write them.
+// Server-only fields on users/{uid}:
+//   tier, monthlyQuota, usedThisMonth, periodKey, rateMinute, rateCount,
+//   lastUsageAt, stripeCustomerId, stripeSubscriptionId.
+// These are written ONLY by the Vercel proxy / billing webhook via firebase-admin.
+// Clients can read but not write them.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function serverOnlyFields() {
+      return ['tier','monthlyQuota','usedThisMonth','periodKey',
+              'rateMinute','rateCount','lastUsageAt',
+              'stripeCustomerId','stripeSubscriptionId'];
+    }
+
     match /users/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow create: if request.auth != null
-                    && request.auth.uid == uid
-                    && !('usedThisMonth' in request.resource.data)
-                    && !('monthlyQuota' in request.resource.data)
-                    && !('periodKey' in request.resource.data);
-      allow update: if request.auth != null
-                    && request.auth.uid == uid
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+                    && !request.resource.data.keys().hasAny(serverOnlyFields());
+      allow update: if isOwner(uid)
                     && !request.resource.data.diff(resource.data).affectedKeys()
-                         .hasAny(['usedThisMonth','monthlyQuota','periodKey','lastUsageAt']);
+                         .hasAny(serverOnlyFields());
       allow delete: if false;
 
       match /state/{docId} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read, write: if isOwner(uid);
+      }
+
+      match /drafts/{draftId} {
+        allow read, write: if isOwner(uid);
       }
     }
   }

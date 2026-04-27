@@ -8,6 +8,8 @@
   <meta name="theme-color" content="#060610"/>
   <meta name="color-scheme" content="dark"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="manifest" href="/manifest.webmanifest"/>
+  <link rel="apple-touch-icon" href="/favicon.svg"/>
   <meta property="og:type" content="website"/>
   <meta property="og:title" content="SceneCraft Studio — AI Screenwriting Suite"/>
   <meta property="og:description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and 9 more formats."/>
@@ -70,6 +72,14 @@
       <h1 class="sel-h1">What are you <em>creating?</em></h1>
       <p class="sel-sub">Select your project type and the studio will tailor every tool — formatting, structure, terminology, and AI assistance — to your format.</p>
     </div>
+
+    <section class="drafts-section" id="draftsSection" hidden aria-labelledby="draftsHeading">
+      <div class="drafts-head">
+        <h2 class="drafts-h" id="draftsHeading">Continue working</h2>
+        <button class="drafts-new" type="button" onclick="newProject()">+ New project</button>
+      </div>
+      <div class="drafts-grid" id="draftsGrid"></div>
+    </section>
 
     <div class="ptgrid" id="ptGrid" role="list" aria-label="Project type">
       <button class="ptcard" type="button" aria-pressed="false" data-type="feature" onclick="selType(this)">

@@ -229,11 +229,14 @@ async function stream(sys,user,onChunk,onDone){
 // ── STORY ──
 async function devStory(){syncS();if(!S.logline&&!S.title){notify('Enter a title or logline first');return;}show('sp1');const w=document.getElementById('ab1-wrap'),t=document.getElementById('ab1t');w.style.display='block';t.value='';setDot('ab1dot',true);const cfg=PT[selectedType];
 const sys=`You are a senior script consultant specializing in ${cfg.name}.`;const p=`Analyze this ${cfg.name} concept:\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\nThemes: ${S.themes}\nProtagonist: ${S.protagonist}\nConflict: ${S.conflict}\n\n1) What's compelling 2) What needs sharpening 3) Comparable works 4) Key note.`;
+previewCost(sys,p);
 await stream(sys,p,(c,full)=>{t.value=full;},()=>{hide('sp1');setDot('ab1dot',false);});}
 
 // ── CAST ──
 async function aiCast(){syncS();show('sp2');const w=document.getElementById('ab2-wrap'),t=document.getElementById('ab2t');w.style.display='block';t.value='';setDot('ab2dot',true);const cfg=PT[selectedType];
-await stream(`You are a ${cfg.name} development expert.`,`Suggest 5 characters for:\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\n\nFormat: NAME — Role — description — Arc: transformation`,(c,full)=>{t.value=full;},()=>{hide('sp2');setDot('ab2dot',false);});}
+const sys=`You are a ${cfg.name} development expert.`;const p=`Suggest 5 characters for:\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\n\nFormat: NAME — Role — description — Arc: transformation`;
+previewCost(sys,p);
+await stream(sys,p,(c,full)=>{t.value=full;},()=>{hide('sp2');setDot('ab2dot',false);});}
 function parseSuggAndAdd(){const txt=document.getElementById('ab2t').value;const lines=txt.split('\n').filter(l=>l.includes('—'));let a=0;lines.forEach(l=>{const p=l.split('—');if(p.length<2)return;const name=p[0].replace(/^\d+\.\s*/,'').trim().toUpperCase();if(!name||name.length>35)return;const role='Supporting';const desc=p.slice(2).join('—').trim();if(!S.cast.find(c=>c.name===name)){S.cast.push({name,role,desc});a++;}});renderCast();updateStats();notify(a>0?`${a} imported!`:'No entries found.');}
 function openCF(idx=-1){editingCharIdx=idx;document.getElementById('cForm').style.display='block';if(idx>=0){const c=S.cast[idx];document.getElementById('cf-n').value=c.name;document.getElementById('cf-r').value=c.role;document.getElementById('cf-d').value=c.desc;document.getElementById('cfSaveBtn').textContent='Save';}else{document.getElementById('cf-n').value='';document.getElementById('cf-d').value='';document.getElementById('cfSaveBtn').textContent='Add';}}
 function closeCF(){document.getElementById('cForm').style.display='none';editingCharIdx=-1;}
@@ -242,9 +245,11 @@ function remChar(i){if(confirm('Remove?')){S.cast.splice(i,1);renderCast();updat
 function renderCast(){const g=document.getElementById('cGrid');if(!g)return;g.innerHTML=S.cast.map((c,i)=>`<div class="cc"><button class="ccedit" type="button" onclick="openCF(${i})" aria-label="Edit ${esc(c.name)}">✏</button><button class="ccdel" type="button" onclick="remChar(${i})" aria-label="Delete ${esc(c.name)}">✕</button><div class="ccn">${esc(c.name)}</div><div class="ccr">${esc(c.role)}</div><div class="ccd">${esc(c.desc||'No description.')}</div></div>`).join('');}
 
 // ── OUTLINE ──
-async function genOutline(){syncS();const n=document.getElementById('o-n')?.value||10,s=document.getElementById('o-s')?.value||'3-Act',cfg=PT[selectedType],cs=S.cast.map(c=>`${c.name} (${c.role})`).join(', ')||'main characters';show('sp3');
+async function genOutline(){syncS();const n=document.getElementById('o-n')?.value||10,sval=document.getElementById('o-s')?.value||'3-Act',cfg=PT[selectedType],cs=S.cast.map(c=>`${c.name} (${c.role})`).join(', ')||'main characters';show('sp3');
 const w=document.getElementById('ab3-wrap'),t=document.getElementById('ab3t');w.style.display='block';t.value='';setDot('ab3dot',true);document.getElementById('slist').innerHTML='';
-await stream(`You are a ${cfg.name} story structure expert.`,`Create a ${n}-${cfg.unitSingular.toLowerCase()} outline using ${s} for:\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\nCast: ${cs}\n\nFormat: 1. [HEADING] — What happens.`,(c,full)=>{t.value=full;},(full)=>{hide('sp3');setDot('ab3dot',false);document.getElementById('ab3-wrap').style.display='none';parseScenes(full);updateStats();renderSceneNav();});}
+const sys=`You are a ${cfg.name} story structure expert.`;const p=`Create a ${n}-${cfg.unitSingular.toLowerCase()} outline using ${sval} for:\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\nCast: ${cs}\n\nFormat: 1. [HEADING] — What happens.`;
+previewCost(sys,p);
+await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{hide('sp3');setDot('ab3dot',false);document.getElementById('ab3-wrap').style.display='none';parseScenes(full);updateStats();renderSceneNav();});}
 function parseScenes(txt){const lines=txt.split('\n').filter(l=>/^\d+\./.test(l.trim()));S.scenes=lines.map((l,i)=>{const wo=l.replace(/^\d+\.\s*/,'').trim();const di=wo.indexOf('—');let loc=wo,desc='';if(di>-1){loc=wo.slice(0,di).trim();desc=wo.slice(di+1).trim();}return{num:i+1,loc,desc};});renderSceneList();}
 function renderSceneList(){const cfg=PT[selectedType],n=S.scenes.length,a1=Math.floor(n*0.25),a2=Math.floor(n*0.75),bb=cfg.beatLabels;
 document.getElementById('slist').innerHTML=S.scenes.map((sc,i)=>{let al='';if(i===0)al=`<div><span class="actlbl">${bb[0]}</span></div>`;else if(i===a1)al=`<div><span class="actlbl">${bb[bb.length>2?1:1]}</span></div>`;else if(i===a2&&bb.length>2)al=`<div><span class="actlbl">${bb[bb.length-1]}</span></div>`;
@@ -266,9 +271,12 @@ function renderSP(){const el=document.getElementById('spContent');if(!el)return;
 async function genScript(){syncS();if(isGen)return;isGen=true;show('sp4');document.getElementById('gsbtn').disabled=true;setMode('preview');const cfg=PT[selectedType],cs=S.cast.map(c=>`${c.name} (${c.role}): ${c.desc}`).join('\n')||'As needed',ss=S.scenes.length?S.scenes.map(s=>`${s.num}. ${s.loc} — ${s.desc}`).join('\n'):'Generate from logline';
 const prompt=`Write a professional ${cfg.name} script:\nTITLE: ${S.title||'Untitled'}\nLOGLINE: ${S.logline}\nSETTING: ${S.setting}\nTONE: ${S.tone}\n\nCAST:\n${cs}\n\nOUTLINE:\n${ss}\n\nBegin with FADE IN:.`;
 const spc=document.getElementById('spContent');spc.innerHTML='';const cur=document.createElement('span');cur.className='gen-cursor';
+previewCost(cfg.scriptSys,prompt);
 await stream(cfg.scriptSys,prompt,(c,full)=>{S.script=full;spc.innerHTML=parseSP(full);spc.appendChild(cur);document.querySelector('.preview')?.scrollTo(0,999999);},(full)=>{S.script=full;renderSP();hide('sp4');document.getElementById('gsbtn').disabled=false;isGen=false;updateStats();renderSceneNav();notify('Generated! ~'+Math.round(full.split(/\s+/).length/185)+' pages');});}
 async function wScene(idx){syncS();const sc=S.scenes[idx];if(!sc||isGen)return;isGen=true;go(3);setMode('preview');show('sp4');document.getElementById('gsbtn').disabled=true;const cfg=PT[selectedType],cs=S.cast.map(c=>`${c.name}: ${c.desc}`).join('\n')||'';const existing=S.script?S.script+'\n\n':'';const spc=document.getElementById('spContent');const cur=document.createElement('span');cur.className='gen-cursor';
-await stream(cfg.scriptSys,`Write one ${cfg.unitSingular.toLowerCase()}:\n${sc.loc} — ${sc.desc}\nTitle: ${S.title}\nCast: ${cs}\nTone: ${S.tone}`,(c,full)=>{spc.innerHTML=parseSP(existing+full);spc.appendChild(cur);document.querySelector('.preview')?.scrollTo(0,999999);},(full)=>{S.script=existing+full;renderSP();hide('sp4');document.getElementById('gsbtn').disabled=false;isGen=false;updateStats();renderSceneNav();notify(cfg.unitSingular+' written!');});}
+const p=`Write one ${cfg.unitSingular.toLowerCase()}:\n${sc.loc} — ${sc.desc}\nTitle: ${S.title}\nCast: ${cs}\nTone: ${S.tone}`;
+previewCost(cfg.scriptSys,p);
+await stream(cfg.scriptSys,p,(c,full)=>{spc.innerHTML=parseSP(existing+full);spc.appendChild(cur);document.querySelector('.preview')?.scrollTo(0,999999);},(full)=>{S.script=existing+full;renderSP();hide('sp4');document.getElementById('gsbtn').disabled=false;isGen=false;updateStats();renderSceneNav();notify(cfg.unitSingular+' written!');});}
 async function appendScene(idx){await wScene(idx);}
 function clearSc(){if(S.script&&!confirm('Clear the entire script?'))return;S.script='';renderSP();const e=document.getElementById('spEditor');if(e)e.value='';updateStats();renderSceneNav();}
 
@@ -276,12 +284,13 @@ function clearSc(){if(S.script&&!confirm('Clear the entire script?'))return;S.sc
 function selPol(btn,t){document.querySelectorAll('.pc').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');polType=t;document.getElementById('polbtn').disabled=false;}
 async function runPol(){if(!polType)return;syncS();show('sp5');document.getElementById('polbtn').disabled=true;const po=document.getElementById('polOut'),ba=document.getElementById('polBefore'),af=document.getElementById('polAfter');po.style.display='block';const sample=(S.script||'No script yet.').substring(0,2500);ba.textContent=sample;af.value='';
 const inst={dialogue:'Rewrite dialogue to be more distinctive and subtext-rich.',action:'Tighten action lines: leaner, present tense.',pacing:'Improve pacing: cut unnecessary beats.',tension:'Raise dramatic stakes: more conflict.',format:`Correct formatting to professional ${PT[selectedType]?.name} standard.`,director:'Add [DIRECTOR\'S NOTE:] after key scenes.'};
-await stream('You are a senior script doctor.',`${inst[polType]}\n\nSCRIPT:\n${sample}`,(c,full)=>{af.value=full;},()=>{hide('sp5');document.getElementById('polbtn').disabled=false;});}
+const sys='You are a senior script doctor.';const p=`${inst[polType]}\n\nSCRIPT:\n${sample}`;
+previewCost(sys,p);
+await stream(sys,p,(c,full)=>{af.value=full;},()=>{hide('sp5');document.getElementById('polbtn').disabled=false;});}
 function acceptPolish(){const af=document.getElementById('polAfter'),p=af?.value;if(!p){notify('Run a polish tool first.');return;}if(confirm('Replace script with polished version?')){S.script=p;renderSP();updateStats();const e=document.getElementById('spEditor');if(e)e.value=p;notify('Accepted!');go(3);}}
 
 // ── EXPORT / UTILS ──
 function copyScript(){navigator.clipboard.writeText(S.script||'No script yet.').then(()=>notify('Copied!'));}
-function doExport(){if(!S.script){notify('Generate a script first!');return;}const blob=new Blob([S.script],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=((S.title||'script').replace(/\s+/g,'-').toLowerCase())+'.txt';a.click();notify('Exported!');}
 function show(el){const e=document.getElementById(el);if(e)e.style.display='inline-block';}
 function hide(el){const e=document.getElementById(el);if(e)e.style.display='none';}
 function notify(msg){const n=document.getElementById('notif');if(!n)return;n.textContent=msg;n.classList.add('on');setTimeout(()=>n.classList.remove('on'),2800);}
@@ -300,62 +309,46 @@ function showErr(msg,retryFn){
 function hideErr(){const b=document.getElementById('errBanner');if(b)b.hidden=true;}
 
 // ══════════════════════════════════════
-//  DRAFT PERSISTENCE (Firestore + localStorage cache)
+//  DRAFT PERSISTENCE (multi-draft, Firestore + localStorage cache)
 // ══════════════════════════════════════
-const SK='scenecraft.draft.v1';
-let saveT=0,lastDraftSerialized='';
-function draftPayload(){return{selectedType,selectedFmt,S};}
+const LS_KEY='scenecraft.cache.v2';      // active draft cache (anon offline use)
+const ONBOARD_KEY='scenecraft.onboarded.v1';
+let currentDraftId=null;
+let saveT=0,lastDraftSerialized='',hasUnsavedChanges=false;
+
 function emptyS(){return{title:'',logline:'',setting:'',themes:'',protagonist:'',conflict:'',tone:'',extra:{},cast:[],scenes:[],script:''};}
+function draftPayload(){return{title:S.title||'Untitled',selectedType,selectedFmt,S};}
+
 function saveDraft(){
   const p=draftPayload();
   let json;try{json=JSON.stringify(p);}catch{return;}
   if(json===lastDraftSerialized)return;
   lastDraftSerialized=json;
-  try{localStorage.setItem(SK,json);}catch{}
+  hasUnsavedChanges=true;
+  try{localStorage.setItem(LS_KEY,JSON.stringify({...p,id:currentDraftId,savedAt:Date.now()}));}catch{}
   clearTimeout(saveT);
-  saveT=setTimeout(()=>{
-    if(window.SC?.getCurrentUser()){
-      window.SC.saveDraftRemote(p).catch(()=>{});
+  saveT=setTimeout(async()=>{
+    if(window.SC?.getCurrentUser()&&window.SC.drafts){
+      try{
+        if(!currentDraftId){
+          currentDraftId=await window.SC.drafts.create(p);
+          await window.SC.drafts.setActive(currentDraftId);
+        }else{
+          await window.SC.drafts.save(currentDraftId,p);
+        }
+        hasUnsavedChanges=false;
+      }catch{/* keep dirty so we retry on next change */}
+    }else{
+      hasUnsavedChanges=false; // local cache is synchronous, no pending I/O
     }
-  },800);
+  },700);
 }
-function loadLocalDraft(){try{return JSON.parse(localStorage.getItem(SK)||'null');}catch{return null;}}
-function clearDraft(){
-  try{localStorage.removeItem(SK);}catch{}
-  lastDraftSerialized='';
-  if(window.SC?.getCurrentUser()){
-    window.SC.saveDraftRemote({selectedType:null,selectedFmt:null,S:emptyS()}).catch(()=>{});
-  }
-}
+function loadLocalCache(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null');}catch{return null;}}
+function clearLocalCache(){try{localStorage.removeItem(LS_KEY);}catch{}}
 
-// ══════════════════════════════════════
-//  RESTORE-DRAFT TOAST
-// ══════════════════════════════════════
-let pendingDraft=null;
-async function checkForDraft(){
-  let candidate=null,scope='local';
-  if(window.SC?.getCurrentUser()){
-    try{const r=await window.SC.loadDraftRemote();if(r&&r.selectedType){candidate=r;scope='remote';}}catch{}
-  }
-  if(!candidate){const local=loadLocalDraft();if(local&&local.selectedType)candidate=local;}
-  if(!candidate)return;
-  pendingDraft=candidate;
-  const t=document.getElementById('restoreToast'),m=document.getElementById('restoreMsg');
-  if(!t)return;
-  if(m)m.textContent=scope==='remote'?'Restore your last cloud draft?':'Restore your last draft (this device)?';
-  t.hidden=false;
-}
-function dismissRestore(){
-  const t=document.getElementById('restoreToast');if(t)t.hidden=true;
-  pendingDraft=null;clearDraft();
-}
-function restoreDraft(){
-  if(!pendingDraft)return;
-  const d=pendingDraft;
+function applyDraftIntoUI(d){
   selectedType=d.selectedType;selectedFmt=d.selectedFmt||null;
   S=Object.assign(emptyS(),d.S||{});
-  pendingDraft=null;
-  document.getElementById('restoreToast').hidden=true;
   buildApp();
   document.getElementById('scr-select').classList.remove('on');
   document.getElementById('scr-app').classList.add('on');
@@ -364,9 +357,117 @@ function restoreDraft(){
   const cfg=PT[selectedType];
   cfg.extraFields.forEach(f=>{if(S.extra&&S.extra[f.id]!=null)setVal('ef-'+f.id,S.extra[f.id]);});
   renderCast();renderSceneList();renderSP();renderSceneNav();updateStats();
-  notify('Draft restored');
+  // updateStats triggers saveDraft; reset its serialized so we don't re-save the same payload immediately.
+  lastDraftSerialized=JSON.stringify(draftPayload());
+  hasUnsavedChanges=false;
 }
 function setVal(id,v){const e=document.getElementById(id);if(e)e.value=v||'';}
+
+// ══════════════════════════════════════
+//  PROJECT PICKER
+// ══════════════════════════════════════
+async function refreshDraftsList(){
+  const sec=document.getElementById('draftsSection');
+  const grid=document.getElementById('draftsGrid');
+  if(!sec||!grid)return;
+  if(!window.SC?.getCurrentUser()){sec.hidden=true;return;}
+  let drafts=[];
+  try{drafts=await window.SC.drafts.list();}catch{drafts=[];}
+  if(!drafts.length){sec.hidden=true;return;}
+  sec.hidden=false;
+  grid.innerHTML=drafts.map(d=>{
+    const ico=PT[d.selectedType]?.ico||'📄';
+    const typeName=PT[d.selectedType]?.name||'Project';
+    const ts=d.updatedAt?.toMillis?d.updatedAt.toMillis():d.updatedAt?.seconds?d.updatedAt.seconds*1000:Date.now();
+    return `<button class="draft-card" type="button" onclick="openDraft('${esc(d.id)}')">
+      <div class="draft-card-actions">
+        <span class="draft-card-act" onclick="event.stopPropagation();renameDraftCmd('${esc(d.id)}','${esc(d.title||'Untitled')}')" title="Rename">✏</span>
+        <span class="draft-card-act danger" onclick="event.stopPropagation();deleteDraftCmd('${esc(d.id)}','${esc(d.title||'Untitled')}')" title="Delete">✕</span>
+      </div>
+      <div class="draft-card-top"><span class="draft-card-ico">${ico}</span><span class="draft-card-type">${esc(typeName)}${d.selectedFmt?' · '+esc(d.selectedFmt):''}</span></div>
+      <div class="draft-card-ttl">${esc(d.title||'Untitled')}</div>
+      <div class="draft-card-meta"><span>${relativeTime(ts)}</span><span>${d.S?.script?.length?Math.round(d.S.script.split(/\s+/).length/185)+'pp':''}</span></div>
+    </button>`;
+  }).join('');
+}
+function relativeTime(ts){
+  if(!ts)return '';
+  const diff=Date.now()-ts;
+  if(diff<60000)return 'just now';
+  if(diff<3600000)return Math.floor(diff/60000)+'m ago';
+  if(diff<86400000)return Math.floor(diff/3600000)+'h ago';
+  if(diff<604800000)return Math.floor(diff/86400000)+'d ago';
+  const d=new Date(ts);return d.toLocaleDateString();
+}
+async function openDraft(id){
+  if(!window.SC?.drafts)return;
+  try{
+    const d=await window.SC.drafts.get(id);
+    if(!d){notify('Draft not found.');return;}
+    currentDraftId=id;
+    await window.SC.drafts.setActive(id);
+    applyDraftIntoUI(d);
+  }catch(e){showErr('Could not load draft: '+e.message);}
+}
+function newProject(){
+  if(!confirmIfDirty())return;
+  currentDraftId=null;
+  selectedType=null;selectedFmt=null;
+  S=emptyS();
+  lastDraftSerialized='';hasUnsavedChanges=false;
+  document.getElementById('scr-app').classList.remove('on');
+  document.getElementById('scr-select').classList.add('on');
+  document.querySelectorAll('.ptcard').forEach(c=>{c.classList.remove('sel');c.setAttribute('aria-pressed','false');});
+  const row=document.getElementById('fmtRow');if(row){row.style.display='none';row.querySelectorAll('.fpill').forEach(p=>p.remove());}
+  const cta=document.getElementById('ctaBtn');cta.classList.remove('ready');cta.setAttribute('aria-disabled','true');
+  document.getElementById('ctaIco').textContent='✦';
+  document.getElementById('ctaHint').textContent='Select a project type above to begin';
+  refreshDraftsList();
+}
+async function renameDraftCmd(id,currentTitle){
+  const t=prompt('Rename project:',currentTitle);
+  if(!t||t.trim()===currentTitle)return;
+  try{await window.SC.drafts.rename(id,t.trim());notify('Renamed');refreshDraftsList();}
+  catch(e){showErr('Could not rename: '+e.message);}
+}
+async function deleteDraftCmd(id,title){
+  if(!confirm(`Delete "${title}"? This cannot be undone.`))return;
+  try{
+    await window.SC.drafts.delete(id);
+    if(currentDraftId===id){currentDraftId=null;clearLocalCache();}
+    notify('Deleted');refreshDraftsList();
+  }catch(e){showErr('Could not delete: '+e.message);}
+}
+
+// ══════════════════════════════════════
+//  RESTORE-DRAFT TOAST (anon users with local cache only)
+// ══════════════════════════════════════
+let pendingDraft=null;
+function checkForLocalDraft(){
+  if(window.SC?.getCurrentUser())return; // signed-in users see the picker instead
+  const local=loadLocalCache();
+  if(!local||!local.selectedType)return;
+  pendingDraft=local;
+  const t=document.getElementById('restoreToast'),m=document.getElementById('restoreMsg');
+  if(!t)return;
+  if(m)m.textContent='Restore your last draft (this device)?';
+  t.hidden=false;
+}
+function dismissRestore(){
+  const t=document.getElementById('restoreToast');if(t)t.hidden=true;
+  pendingDraft=null;clearLocalCache();lastDraftSerialized='';
+}
+function restoreDraft(){
+  if(!pendingDraft)return;
+  const d=pendingDraft;pendingDraft=null;
+  document.getElementById('restoreToast').hidden=true;
+  applyDraftIntoUI(d);
+  notify('Draft restored');
+}
+function confirmIfDirty(){
+  if(!hasUnsavedChanges)return true;
+  return confirm('You have unsaved changes that may not be synced yet. Continue?');
+}
 
 // ══════════════════════════════════════
 //  AUTH MODAL
@@ -495,18 +596,205 @@ function updateAuthUI(user,quota){
 }
 
 // ══════════════════════════════════════
+//  EXPORT MENU (TXT, PDF, FDX)
+// ══════════════════════════════════════
+function doExport(){
+  if(!S.script){notify('Generate a script first!');return;}
+  const m=document.getElementById('exportMenu');
+  if(m){m.remove();return;}
+  const anchor=document.querySelector('.xbtn');
+  const r=anchor?.getBoundingClientRect()||{bottom:60,right:window.innerWidth-20};
+  const menu=document.createElement('div');
+  menu.id='exportMenu';menu.className='user-menu';
+  menu.style.top=(r.bottom+6)+'px';
+  menu.style.right=(window.innerWidth-r.right)+'px';
+  menu.innerHTML=`
+    <button class="user-menu-item" type="button" onclick="exportTxt()">Plain text (.txt)</button>
+    <button class="user-menu-item" type="button" onclick="exportPdf()">PDF — print dialog</button>
+    <button class="user-menu-item" type="button" onclick="exportFdx()">Final Draft (.fdx)</button>`;
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener('click',closeExportMenuOnce,{once:true}),0);
+}
+function closeExportMenuOnce(){const m=document.getElementById('exportMenu');if(m)m.remove();}
+function safeFilename(){return(S.title||'script').replace(/[^a-z0-9-]+/gi,'-').toLowerCase().replace(/^-|-$/g,'')||'script';}
+function exportTxt(){
+  closeExportMenuOnce();
+  const blob=new Blob([S.script],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.txt';a.click();
+  URL.revokeObjectURL(a.href);notify('Exported .txt');
+}
+function exportPdf(){
+  closeExportMenuOnce();
+  // Make sure preview is visible (print CSS hides everything except .sppage)
+  setMode('preview');
+  setTimeout(()=>{window.print();notify('Print dialog opened — choose "Save as PDF".');},80);
+}
+function exportFdx(){
+  closeExportMenuOnce();
+  const xml=buildFdx(S.script,S.title||'Untitled');
+  const blob=new Blob([xml],{type:'application/xml;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.fdx';a.click();
+  URL.revokeObjectURL(a.href);notify('Exported .fdx');
+}
+function buildFdx(script,title){
+  // Minimal Final Draft 8+ XML. Each line classified using the same heuristics as parseSP.
+  const lines=(script||'').split('\n');
+  const paras=[];
+  let inDial=false;
+  for(const t of lines){
+    const tr=t.trim();
+    if(!tr){inDial=false;continue;}
+    let type='Action';
+    if(/^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO:|THE END|ACT ONE|ACT TWO|ACT THREE|END OF ACT|TAG:)$/.test(tr)){type='Transition';inDial=false;}
+    else if(/^(INT\.|EXT\.|I\/E\.|B-ROLL:|SCENE\s\d|SEGMENT\s\d|SHOT\s\d|SOUND:|MUSIC:)/.test(tr)){type='Scene Heading';inDial=false;}
+    else if(tr.startsWith('(')&&tr.endsWith(')')&&inDial){type='Parenthetical';}
+    else if(/^[A-Z][A-Z\s'\-()\.V]+$/.test(tr)&&tr.length<45&&!tr.endsWith('TO:')&&tr.split(' ').length<=6){type='Character';inDial=true;}
+    else if(inDial){type='Dialogue';}
+    else{type='Action';inDial=false;}
+    paras.push(`    <Paragraph Type="${type}"><Text>${esc(tr)}</Text></Paragraph>`);
+  }
+  return `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft DocumentType="Script" Template="No" Version="1">
+  <Content>
+${paras.join('\n')}
+  </Content>
+  <TitlePage>
+    <Content>
+      <Paragraph Alignment="Center"><Text>${esc(title)}</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>by SceneCraft Studio</Text></Paragraph>
+    </Content>
+  </TitlePage>
+</FinalDraft>`;
+}
+
+// ══════════════════════════════════════
+//  EMAIL VERIFICATION BANNER
+// ══════════════════════════════════════
+function updateVerifyBanner(user){
+  let b=document.getElementById('verifyBanner');
+  const needs=user&&user.email&&!user.emailVerified&&user.providerData?.some(p=>p.providerId==='password');
+  if(!needs){if(b)b.remove();return;}
+  if(b)return; // already shown
+  b=document.createElement('div');b.id='verifyBanner';b.className='verify-banner';b.setAttribute('role','status');
+  b.innerHTML=`<span>Please verify <b>${esc(user.email)}</b> to use AI generation. Check your inbox.</span>
+    <button type="button" onclick="resendVerify()">Resend</button>
+    <button type="button" onclick="checkedVerify()">I verified</button>
+    <button class="verify-x" type="button" aria-label="Dismiss" onclick="this.parentElement.remove()">✕</button>`;
+  document.body.appendChild(b);
+}
+async function resendVerify(){
+  try{await window.SC.resendVerification();notify('Verification email sent');}
+  catch(e){showErr(e.message||'Could not resend.');}
+}
+async function checkedVerify(){
+  try{
+    await window.SC.reloadUser();
+    const u=window.SC.getCurrentUser();
+    if(u?.emailVerified){notify('Verified!');document.getElementById('verifyBanner')?.remove();}
+    else notify('Still not verified — check your inbox and click the link.');
+  }catch{}
+}
+
+// ══════════════════════════════════════
+//  TOKEN COST PREVIEW
+// ══════════════════════════════════════
+function estimateTokens(s){return Math.ceil((String(s||'').length)/3.7);} // rough char→token
+function previewCost(sys,user){
+  const t=estimateTokens(sys)+estimateTokens(user)+200; // +200 for response setup
+  notify(`Generating · ~${t.toLocaleString()} tokens (est.)`);
+}
+
+// ══════════════════════════════════════
+//  ONBOARDING TOUR
+// ══════════════════════════════════════
+function maybeStartOnboarding(){
+  try{if(localStorage.getItem(ONBOARD_KEY))return;}catch{return;}
+  // Wait until project select screen is the visible one and grid is rendered.
+  if(!document.getElementById('scr-select')?.classList.contains('on'))return;
+  startOnboarding();
+}
+function startOnboarding(){
+  const steps=[
+    {sel:'.ptcard',msg:'1. Pick a project type. The studio tailors every tool to your format.',pos:'bottom'},
+    {sel:'#fmtRow,#ctaBtn',msg:'2. Choose a sub-format and start writing.',pos:'top'},
+    {sel:'#userPillSel',msg:'3. Sign in to save drafts and unlock AI generation.',pos:'bottom'},
+  ];
+  showOnboardStep(steps,0);
+}
+function showOnboardStep(steps,i){
+  const old=document.getElementById('coachmark');if(old)old.remove();
+  if(i>=steps.length){try{localStorage.setItem(ONBOARD_KEY,'1');}catch{}return;}
+  const s=steps[i];
+  const target=document.querySelector(s.sel);
+  if(!target){showOnboardStep(steps,i+1);return;}
+  const r=target.getBoundingClientRect();
+  const cm=document.createElement('div');cm.id='coachmark';cm.className='coachmark';
+  cm.innerHTML=`<div class="coachmark-msg">${esc(s.msg)}</div>
+    <div class="coachmark-row"><span class="coachmark-step">${i+1} / ${steps.length}</span>
+      <button class="coachmark-skip" type="button" onclick="endOnboarding()">Skip</button>
+      <button class="coachmark-next" type="button" id="coachNext">${i===steps.length-1?'Done':'Next'}</button></div>`;
+  document.body.appendChild(cm);
+  const cmr=cm.getBoundingClientRect();
+  let top=s.pos==='top'?r.top-cmr.height-12:r.bottom+12;
+  let left=Math.min(window.innerWidth-cmr.width-12,Math.max(12,r.left+r.width/2-cmr.width/2));
+  if(top<12)top=r.bottom+12;
+  if(top+cmr.height>window.innerHeight-12)top=Math.max(12,r.top-cmr.height-12);
+  cm.style.top=top+'px';cm.style.left=left+'px';
+  document.getElementById('coachNext').onclick=()=>showOnboardStep(steps,i+1);
+}
+function endOnboarding(){
+  document.getElementById('coachmark')?.remove();
+  try{localStorage.setItem(ONBOARD_KEY,'1');}catch{}
+}
+
+// ══════════════════════════════════════
+//  BEFOREUNLOAD GUARD
+// ══════════════════════════════════════
+window.addEventListener('beforeunload',(e)=>{
+  if(isGen||hasUnsavedChanges){
+    e.preventDefault();
+    e.returnValue='';
+    return '';
+  }
+});
+
+// ══════════════════════════════════════
+//  PWA — register service worker
+// ══════════════════════════════════════
+if('serviceWorker' in navigator&&location.protocol!=='file:'){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/service-worker.js').catch(()=>{/* SW is optional */});
+  });
+}
+
+// ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
-function bootstrap(){
+async function bootstrap(){
   if(window.SC?.onAuth){
     let firstAuth=true;
     window.SC.onAuth(async(user,quota)=>{
       updateAuthUI(user,quota);
-      if(firstAuth){firstAuth=false;await checkForDraft();}
+      updateVerifyBanner(user);
+      refreshDraftsList(); // hides itself if signed out
+      if(firstAuth){
+        firstAuth=false;
+        if(user){
+          try{
+            const activeId=await window.SC.drafts.getActive();
+            if(activeId){
+              const d=await window.SC.drafts.get(activeId);
+              if(d){currentDraftId=activeId;applyDraftIntoUI(d);return;}
+            }
+          }catch{}
+        }
+        checkForLocalDraft();
+        maybeStartOnboarding();
+      }
     });
   }else{
-    // Firebase failed to load — still surface any local draft so user doesn't lose work.
-    checkForDraft();
+    checkForLocalDraft();
+    maybeStartOnboarding();
   }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootstrap);
