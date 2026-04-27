@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SceneCraft Studio — AI Screenwriting Suite</title>
+  <meta name="description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and 9 more formats. Tailored tools, structure, and AI assistance for every script."/>
+  <meta name="theme-color" content="#060610"/>
+  <meta name="color-scheme" content="dark"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="SceneCraft Studio — AI Screenwriting Suite"/>
+  <meta property="og:description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and 9 more formats."/>
+  <meta property="og:image" content="/og-image.svg"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="SceneCraft Studio — AI Screenwriting Suite"/>
+  <meta name="twitter:description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and more."/>
+  <meta name="twitter:image" content="/og-image.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Courier+Prime:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<noscript>
+  <div class="noscript">
+    <div class="noscript-logo">Scene<em>Craft</em></div>
+    <p>SceneCraft Studio requires JavaScript. Please enable it in your browser to continue.</p>
+  </div>
+</noscript>
+
+<!-- ══════════════════════════════════════
+     LOADING SPLASH
+══════════════════════════════════════ -->
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="splash-inner">
+    <div class="splash-logo">Scene<em>Craft</em></div>
+    <div class="splash-bar"><div class="splash-fill"></div></div>
+    <div class="splash-sub">Loading Studio…</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PROJECT SELECT SCREEN
+══════════════════════════════════════ -->
+<div class="screen on" id="scr-select">
+  <div class="sel-bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <header class="sel-header">
+    <div class="sel-brand">Scene<em>Craft</em> Studio</div>
+    <div class="sel-header-r">
+      <div class="sel-ver">v2.0</div>
+      <button class="user-pill sel-user-pill" id="userPillSel" type="button" onclick="onUserPillClick()">
+        <span class="user-avatar" id="userAvatarSel" aria-hidden="true">?</span>
+        <span class="user-label" id="userLabelSel">Sign in</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="sel-inner">
+    <div class="sel-hero">
+      <div class="sel-eyebrow"><span class="sel-ey-line"></span>SceneCraft Studio<span class="sel-ey-line"></span></div>
+      <h1 class="sel-h1">What are you <em>creating?</em></h1>
+      <p class="sel-sub">Select your project type and the studio will tailor every tool — formatting, structure, terminology, and AI assistance — to your format.</p>
+    </div>
+
+    <div class="ptgrid" id="ptGrid" role="list" aria-label="Project type">
+      <button class="ptcard" type="button" aria-pressed="false" data-type="feature" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">🎬</span>
+        <div class="pt-name">Feature Film</div>
+        <div class="pt-sub">Full-length screenplay, 80–120 pages. 3-act structure, Hollywood format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="short" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">🎞</span>
+        <div class="pt-name">Short Film</div>
+        <div class="pt-sub">Compact narrative, under 40 pages. Festival-ready format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="tv" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <div class="pt-tag">Series</div>
+        <span class="pt-ico">📺</span>
+        <div class="pt-name">TV Show</div>
+        <div class="pt-sub">Episodic drama or comedy. Pilot, spec script, or full season.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="doc" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">🎙</span>
+        <div class="pt-name">Documentary</div>
+        <div class="pt-sub">Treatment, shooting script, or narration. Interview-based or cinematic.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="web" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <div class="pt-tag">Digital</div>
+        <span class="pt-ico">📱</span>
+        <div class="pt-name">Web Series</div>
+        <div class="pt-sub">Short episodic content. YouTube, TikTok, streaming platform.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="animation" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">✏️</span>
+        <div class="pt-name">Animation</div>
+        <div class="pt-sub">Animated feature, series, or short. Specialized action line format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="commercial" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">📣</span>
+        <div class="pt-name">Commercial / Ad</div>
+        <div class="pt-sub">15s to 3-min video scripts. Brand storytelling, broadcast format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="miniseries" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <div class="pt-tag">Limited</div>
+        <span class="pt-ico">🎭</span>
+        <div class="pt-name">Mini-Series</div>
+        <div class="pt-sub">Limited series 2–8 episodes. Streaming platform format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="stage" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">🎪</span>
+        <div class="pt-name">Stage Play</div>
+        <div class="pt-sub">Theater script. One-act to full play. Stage direction format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="podcast" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">🎧</span>
+        <div class="pt-name">Audio Drama</div>
+        <div class="pt-sub">Podcast script or radio play. Sound-first storytelling format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="music" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <span class="pt-ico">🎵</span>
+        <div class="pt-name">Music Video</div>
+        <div class="pt-sub">Narrative or performance-based. Shot list & treatment format.</div>
+      </button>
+
+      <button class="ptcard" type="button" aria-pressed="false" data-type="pilot" onclick="selType(this)">
+        <div class="pt-check">✓</div>
+        <div class="pt-glow"></div>
+        <div class="pt-tag">Spec</div>
+        <span class="pt-ico">🚀</span>
+        <div class="pt-name">TV Pilot</div>
+        <div class="pt-sub">Series premiere episode. Network or streaming spec format.</div>
+      </button>
+    </div>
+
+    <!-- SUB-FORMAT PILLS -->
+    <div id="fmtRow" class="fmt-row" style="display:none;">
+      <span class="fmt-lbl" id="fmtLbl">Format:</span>
+    </div>
+
+    <div class="sel-cta">
+      <button class="cta-btn" id="ctaBtn" type="button" onclick="startApp()" aria-disabled="true">
+        <span class="cta-ico" id="ctaIco" aria-hidden="true">✦</span>
+        <span>Start Writing</span>
+        <span class="cta-arrow" aria-hidden="true">→</span>
+      </button>
+      <span class="cta-hint" id="ctaHint">Select a project type above to begin</span>
+    </div>
+
+    <div class="restore-toast" id="restoreToast" role="status" hidden>
+      <span class="restore-msg" id="restoreMsg">A previous draft was found.</span>
+      <button class="restore-yes" type="button" onclick="restoreDraft()">Restore</button>
+      <button class="restore-no" type="button" onclick="dismissRestore()">Start fresh</button>
+    </div>
+  </div>
+
+  <footer class="sel-footer">
+    <span>SceneCraft Studio © 2026</span>
+    <span class="sel-footer-dot" aria-hidden="true">·</span>
+    <span>AI-Powered Screenwriting</span>
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP SCREEN
+══════════════════════════════════════ -->
+<div class="screen" id="scr-app">
+
+  <!-- HEADER -->
+  <header class="hd">
+    <button class="hd-menu-btn" id="hdMenuBtn" type="button" onclick="toggleMobileMenu()"
+            aria-label="Open navigation" aria-expanded="false" aria-controls="mobileNav">
+      <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </button>
+    <div class="brand">Scene<em>Craft</em></div>
+    <nav class="tabs" id="tabNav" role="tablist" aria-label="Studio sections"></nav>
+    <div class="hd-r">
+      <div class="hd-stat" id="hdStat" aria-live="off"></div>
+      <div class="hd-quota" id="hdQuota" hidden></div>
+      <button class="xbtn" type="button" onclick="doExport()" aria-label="Export script">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span class="xbtn-text">Export</span>
+      </button>
+      <button class="user-pill" id="userPill" type="button" onclick="onUserPillClick()">
+        <span class="user-avatar" id="userAvatar" aria-hidden="true">?</span>
+        <span class="user-label" id="userLabel">Sign in</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileMenu()" aria-hidden="true"></div>
+  <div class="mobile-nav" id="mobileNav" role="dialog" aria-label="Navigation" aria-modal="false" aria-hidden="true">
+    <div class="mobile-nav-header">
+      <div class="brand">Scene<em>Craft</em></div>
+      <button class="mobile-nav-close" type="button" onclick="toggleMobileMenu()" aria-label="Close navigation">✕</button>
+    </div>
+    <div class="mobile-nav-tabs" id="mobileTabNav" role="tablist" aria-label="Studio sections (mobile)"></div>
+    <div class="mobile-nav-stats" id="mobileStats"></div>
+    <button class="mobile-nav-export" type="button" onclick="doExport();toggleMobileMenu();">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export Script
+    </button>
+  </div>
+
+  <div class="err-banner" id="errBanner" role="alert" hidden>
+    <span class="err-icon" aria-hidden="true">⚠</span>
+    <span class="err-msg" id="errMsg"></span>
+    <button class="err-retry" id="errRetry" type="button">Retry</button>
+    <button class="err-close" id="errClose" type="button" aria-label="Dismiss error">✕</button>
+  </div>
+
+  <div class="notif" id="notif" role="status" aria-live="polite"></div>
+
+  <!-- PANELS -->
+  <div id="panelsContainer"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     AUTH MODAL
+══════════════════════════════════════ -->
+<div class="auth-overlay" id="authOverlay" hidden onclick="closeAuth(event)">
+  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle" onclick="event.stopPropagation()">
+    <button class="auth-close" type="button" onclick="closeAuth()" aria-label="Close sign in">✕</button>
+    <div class="auth-brand">Scene<em>Craft</em></div>
+    <h2 class="auth-title" id="authTitle">Sign in to continue</h2>
+    <p class="auth-sub" id="authSub">AI generation requires an account so we can keep your drafts safe and prevent abuse.</p>
+
+    <button class="auth-google" type="button" onclick="doGoogleSignIn()">
+      <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C33.9 6.1 29.2 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C33.9 6.1 29.2 4 24 4 16.4 4 9.8 8.4 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.1 0 9.8-2 13.3-5.2l-6.2-5.2C29 35.4 26.6 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.7 39.5 16.3 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.2 5.2C40.7 35.4 44 30.1 44 24c0-1.2-.1-2.4-.4-3.5z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="auth-divider"><span>or</span></div>
+
+    <form class="auth-form" id="authForm" onsubmit="doEmailAuth(event)">
+      <div class="auth-tabs">
+        <button class="auth-tab on" type="button" id="authTabIn" onclick="setAuthMode('signin')">Sign in</button>
+        <button class="auth-tab" type="button" id="authTabUp" onclick="setAuthMode('signup')">Create account</button>
+      </div>
+      <label class="auth-label" for="authEmail">Email</label>
+      <input class="auth-input" id="authEmail" name="email" type="email" autocomplete="email" required/>
+      <label class="auth-label" for="authPwd">Password</label>
+      <input class="auth-input" id="authPwd" name="password" type="password" autocomplete="current-password" minlength="6" required/>
+      <div class="auth-err" id="authErr" role="alert" hidden></div>
+      <button class="auth-submit" type="submit" id="authSubmit">Sign in</button>
+      <button class="auth-forgot" type="button" id="authForgot" onclick="doResetPassword()">Forgot password?</button>
+    </form>
+  </div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script type="module" src="firebase-init.js"></script>
+<script defer src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/emilkowalski/skill/refs/heads/main/skills/emil-design-eng/SKILL.md\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('plugins', d.get\\('enabledPlugins', 'not found'\\)\\), indent=2\\)\\)\")",
+      "Bash(curl -s \"https://api.github.com/repos/emilkowalski/skill/git/trees/HEAD?recursive=1\")",
+      "Bash(where claude *)",
+      "Read(//c/Users/Ava Juliet/.local/bin/**)",
+      "Read(//c/Users/Ava Juliet/.local/**)",
+      "Bash(\"C:/Users/Ava Juliet/.local/bin/claude.exe\" plugin --help)",
+      "Bash(\"C:/Users/Ava Juliet/.local/bin/claude.exe\" plugin install --help)",
+      "Bash(\"C:/Users/Ava Juliet/.local/bin/claude.exe\" plugin marketplace --help)",
+      "Bash(\"C:/Users/Ava Juliet/.local/bin/claude.exe\" plugin marketplace add --help)",
+      "Bash(curl -s \"https://api.github.com/repos/emilkowalski/skill/contents/.claude-plugin\")",
+      "Bash(curl -s \"https://api.github.com/repos/emilkowalski/skill/contents/.claude-plugin/plugin.json\")",
+      "Bash(mkdir -p \"C:/Users/Ava Juliet/.claude/plugins/emilkowalski/.claude-plugin\")",
+      "Bash(mkdir -p \"C:/Users/Ava Juliet/.claude/plugins/emilkowalski/plugins/emil-design-eng/.claude-plugin\")",
+      "Bash(mkdir -p \"C:/Users/Ava Juliet/.claude/plugins/emilkowalski/plugins/emil-design-eng/skills/emil-design-eng\")"
+    ]
+  }
+}
