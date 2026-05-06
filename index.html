@@ -47,7 +47,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .ptcard:hover::before{opacity:1;}
 .ptcard.sel{border-color:var(--g);background:rgba(200,144,30,0.08);box-shadow:0 0 0 1px rgba(200,144,30,0.25),0 8px 32px rgba(200,144,30,0.1);}
 .ptcard.sel::before{opacity:1;}
-.pt-icon{font-size:1.5rem;margin-bottom:0.55rem;display:block;line-height:1;}
+.pt-ico{font-size:1.5rem;margin-bottom:0.55rem;display:block;line-height:1;}
 .pt-name{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:0.2rem;}
 .pt-sub{font-size:10px;color:var(--mu);line-height:1.4;}
 .pt-tag{position:absolute;top:8px;right:8px;font-size:8px;font-weight:700;letter-spacing:0.07em;background:rgba(200,144,30,0.15);border:1px solid var(--brg);color:var(--g);padding:1px 6px;border-radius:20px;}
@@ -60,7 +60,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-h
 .fpill.sel{background:rgba(200,144,30,0.12);border-color:var(--g);color:var(--g);}
 .fmt-lbl{font-size:10px;color:var(--mu);align-self:center;margin-right:4px;text-transform:uppercase;letter-spacing:0.08em;}
 
-.sel-cta{display:flex;align-items:ceenter;gap:1rem;flex-wrap:wrap;}
+.sel-cta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
 .cta-btn{background:var(--g);color:#000;border:none;padding:0.75rem 2rem;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px;transition:background 0.2s;opacity:0.35;pointer-events:none;}
 .cta-btn.ready{opacity:1;pointer-events:auto;}
 .cta-btn.ready:hover{background:var(--gl);}
@@ -390,7 +390,7 @@ const PT = {
     loglineHint:'In a world of [animated setting], a [character] must [quest] to [ultimate goal].',
     extraFields:[{id:'rating',label:'Target Rating',type:'select',opts:['G / Family','PG / All Ages','PG-13','R / Adult Animation']}],
     beatLabels:['ACT I','ACT II','ACT III'],beatSubs:['Ordinary World','Adventure','Resolution'],
-    scriptSys:`You are a professional animation screenwriter. Use standard screenplay format but note action lines describe what is ANIMATED — visual gagphysical comedy, impossible action. Be highly visual and descriptive. Character names ALL CAPS, dialogue concise and character-specific.`
+    scriptSys:`You are a professional animation screenwriter. Use standard screenplay format but note action lines describe what is ANIMATED — visual gags, physical comedy, impossible action. Be highly visual and descriptive. Character names ALL CAPS, dialogue concise and character-specific.`
   },
   commercial:{ico:'📣',name:'Commercial / Ad',fmt:['Brand Film','30-Second Spot','60-Second','Product Demo','Social Media Ad','PSA'],
     tabs:['Brief','Talent','Storyboard','Script','Polish'],
@@ -399,7 +399,7 @@ const PT = {
     pages:'1–5 pages',runtime:'15s–3 min',
     loglineHint:'A [brand story] that makes the viewer feel [emotion] and inspires them to [action].',
     extraFields:[{id:'brand',label:'Brand / Product',type:'text',placeholder:'e.g. MTN Uganda'},{id:'cta',label:'Call to Action',type:'text',placeholder:'e.g. Visit mtnonline.com'}],
-    beatLabels:['HOOL','STORY','CTA'],beatSubs:['Grab attention','Build emotion','Drive action'],
+    beatLabels:['HOOK','STORY','CTA'],beatSubs:['Grab attention','Build emotion','Drive action'],
     scriptSys:`You are an award-winning commercial screenwriter. Write tight, visual ad scripts. Every second counts. Hook within 3 seconds, emotional payoff, clear CTA. Use VISUAL: / AUDIO: / VO: format or standard screenplay style.`
   },
   miniseries:{ico:'🎭',name:'Mini-Series',fmt:['2 Episodes','4 Episodes','6 Episodes','8 Episodes'],
@@ -1059,7 +1059,7 @@ async function wScene(idx){
   },(full)=>{
     S.script=existing+full;renderSP();hide('sp4');
     document.getElementById('gsbtn').disabled=false;isGen=false;
-    updateStats();renderSceneNav();�otify(cfg.unitSingular+' '+sc.num+' written!');
+    updateStats();renderSceneNav();notify(cfg.unitSingular+' '+sc.num+' written!');
   });
 }
 async function appendScene(idx){await wScene(idx);}
