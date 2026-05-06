@@ -33,10 +33,10 @@ app.post('/api/claude', async (req, res) => {
       body: JSON.stringify(req.body),
     });
 
-    // Stream the response directly to the client
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
 
     upstream.body.pipe(res);
 
@@ -57,4 +57,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`SceneCraft Studio running on http://l
+  console.log(`SceneCraft Studio running on http://localhost:${PORT}`);
+});
