@@ -1,4 +1,5 @@
-import express from 'express';
+import 'dotenv/config';
+himport express from 'express';
 import fetch from 'node-fetch';
 import cors from 'cors';
 import path from 'path';
@@ -35,6 +36,7 @@ app.post('/api/claude', async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
 
     upstream.body.pipe(res);
 
