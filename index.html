@@ -1,311 +1,1133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SceneCraft Studio — AI Screenwriting Suite</title>
-  <meta name="description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and 9 more formats. Tailored tools, structure, and AI assistance for every script."/>
-  <meta name="theme-color" content="#060610"/>
-  <meta name="color-scheme" content="dark"/>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <link rel="manifest" href="/manifest.webmanifest"/>
-  <link rel="apple-touch-icon" href="/favicon.svg"/>
-  <meta property="og:type" content="website"/>
-  <meta property="og:title" content="SceneCraft Studio — AI Screenwriting Suite"/>
-  <meta property="og:description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and 9 more formats."/>
-  <meta property="og:image" content="/og-image.svg"/>
-  <meta property="og:image:width" content="1200"/>
-  <meta property="og:image:height" content="630"/>
-  <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="SceneCraft Studio — AI Screenwriting Suite"/>
-  <meta name="twitter:description" content="Premium AI-powered screenwriting for feature films, TV, documentaries, and more."/>
-  <meta name="twitter:image" content="/og-image.svg"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Courier+Prime:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SceneCraft Studio — AI Screenplay Writer</title>
+<meta name="description" content="Professional AI-powered screenplay writing studio. Feature films, TV shows, documentaries, shorts and more. Hollywood standard formatting."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Courier+Prime:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g:#C8901E;--gl:#E0A838;--gd:#8A6010;
+  --bg:#05050F;--bg2:#0C0C1A;--bg3:#131320;--bg4:#1B1B2A;
+  --br:rgba(255,255,255,0.07);--brg:rgba(200,144,30,0.22);
+  --tx:#EAE6DA;--mu:#6A6280;--su:#A8A090;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;}
+.screen.on{display:flex;flex-direction:column;}
+#scr-app.on{display:flex;flex-direction:column;}
+
+/* ══════════════════════════════
+   PROJECT SELECT SCREEN
+══════════════════════════════ */
+#scr-select{
+  background:
+    radial-gradient(ellipse 60% 40% at 70% 20%, rgba(200,144,30,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 20% 80%, rgba(120,80,200,0.04) 0%, transparent 60%),
+    var(--bg);
+  align-items:center;justify-content:flex-start;padding:2.5rem 1.5rem 3rem;
+}
+.sel-inner{width:100%;max-width:920px;margin:0 auto;}
+.sel-eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:0.18em;color:var(--g);margin-bottom:0.7rem;display:flex;align-items:center;gap:8px;}
+.sel-eyebrow::before{content:'';display:inline-block;width:24px;height:1px;background:var(--g);}
+.sel-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(1.9rem,4vw,2.8rem);font-weight:600;line-height:1.1;margin-bottom:0.4rem;color:var(--tx);}
+.sel-h1 em{font-style:italic;font-weight:300;color:var(--g);}
+.sel-sub{font-size:13px;color:var(--mu);margin-bottom:2rem;line-height:1.6;max-width:500px;}
+
+.ptgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:0.75rem;margin-bottom:1.8rem;}
+.ptcard{background:rgba(255,255,255,0.025);border:1px solid var(--br);border-radius:8px;padding:1.1rem 1rem;cursor:pointer;transition:all 0.22s;position:relative;overflow:hidden;text-align:left;font-family:'DM Sans',sans-serif;}
+.ptcard::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,144,30,0.07) 0%,transparent 60%);opacity:0;transition:opacity 0.22s;}
+.ptcard:hover{border-color:rgba(200,144,30,0.45);transform:translateY(-2px);}
+.ptcard:hover::before{opacity:1;}
+.ptcard.sel{border-color:var(--g);background:rgba(200,144,30,0.08);box-shadow:0 0 0 1px rgba(200,144,30,0.25),0 8px 32px rgba(200,144,30,0.1);}
+.ptcard.sel::before{opacity:1;}
+.pt-ico{font-size:1.5rem;margin-bottom:0.55rem;display:block;line-height:1;}
+.pt-name{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:0.2rem;}
+.pt-sub{font-size:10px;color:var(--mu);line-height:1.4;}
+.pt-tag{position:absolute;top:8px;right:8px;font-size:8px;font-weight:700;letter-spacing:0.07em;background:rgba(200,144,30,0.15);border:1px solid var(--brg);color:var(--g);padding:1px 6px;border-radius:20px;}
+.pt-check{position:absolute;bottom:8px;right:8px;width:16px;height:16px;border-radius:50%;background:var(--g);display:none;align-items:center;justify-content:center;font-size:9px;color:#000;font-weight:700;}
+.ptcard.sel .pt-check{display:flex;}
+
+.fmt-row{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;min-height:28px;align-items:center;}
+.fpill{background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--su);padding:4px 12px;border-radius:20px;font-size:11px;cursor:pointer;transition:all 0.18s;font-family:'DM Sans',sans-serif;}
+.fpill:hover{border-color:var(--brg);color:var(--g);}
+.fpill.sel{background:rgba(200,144,30,0.12);border-color:var(--g);color:var(--g);}
+.fmt-lbl{font-size:10px;color:var(--mu);align-self:center;margin-right:4px;text-transform:uppercase;letter-spacing:0.08em;}
+
+.sel-cta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+.cta-btn{background:var(--g);color:#000;border:none;padding:0.75rem 2rem;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px;transition:background 0.2s;opacity:0.35;pointer-events:none;}
+.cta-btn.ready{opacity:1;pointer-events:auto;}
+.cta-btn.ready:hover{background:var(--gl);}
+.cta-hint{font-size:11px;color:var(--mu);}
+
+/* ══════════════════════════════
+   APP SCREEN
+══════════════════════════════ */
+.hd{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--brg);padding:0 1rem;height:48px;display:flex;align-items:center;gap:0.6rem;flex-shrink:0;}
+.brand{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--g);letter-spacing:0.04em;white-space:nowrap;flex-shrink:0;}
+.brand em{color:var(--tx);font-style:italic;font-weight:300;}
+.tabs{display:flex;flex:1;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{height:48px;padding:0 0.8rem;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--mu);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.tab:hover{color:var(--su);}
+.tab.on{color:var(--g);border-bottom-color:var(--g);}
+.tn{width:15px;height:15px;border-radius:50%;background:rgba(200,144,30,0.1);border:1px solid var(--brg);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--g);}
+.tab.on .tn{background:var(--g);color:#000;border-color:var(--g);}
+.hd-r{margin-left:auto;display:flex;gap:0.5rem;align-items:center;flex-shrink:0;}
+.hd-stat{font-size:11px;color:var(--mu);white-space:nowrap;display:flex;gap:0.7rem;}
+.hd-stat b{color:var(--g);}
+.xbtn{background:var(--g);color:#000;border:none;padding:5px 11px;border-radius:3px;font-size:11px;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.xbtn:hover{background:var(--gl);}
+
+.panel{display:none;}
+.panel.on{display:block;}
+.panel.script-panel.on{display:flex;align-items:flex-start;min-height:calc(100vh - 48px);}
+
+.pg{padding:1.5rem;max-width:800px;margin:0 auto;}
+.tool{width:300px;min-width:250px;background:var(--bg2);border-right:1px solid var(--br);padding:1.1rem;min-height:calc(100vh - 48px);flex-shrink:0;overflow-y:auto;}
+.preview{flex:1;padding:1.4rem 1.1rem;background:var(--bg3);min-height:calc(100vh - 48px);overflow-y:auto;}
+
+.ttl{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--tx);margin-bottom:0.15rem;}
+.sub{font-size:11px;color:var(--mu);margin-bottom:1rem;line-height:1.5;}
+.lbl{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--mu);display:block;margin-bottom:0.3rem;}
+.div{height:1px;background:var(--br);margin:0.9rem 0;}
+.tip{background:rgba(200,144,30,0.05);border-left:2px solid rgba(200,144,30,0.3);padding:0.42rem 0.7rem;font-size:11px;color:#A89060;border-radius:0 3px 3px 0;margin-bottom:0.9rem;line-height:1.5;}
+
+input,select{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--tx);border-radius:4px;padding:0.52rem 0.72rem;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;}
+input:focus,select:focus{border-color:rgba(200,144,30,0.5);}
+textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--tx);border-radius:4px;padding:0.52rem 0.72rem;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;transition:border-color 0.2s;min-height:65px;line-height:1.6;}
+textarea:focus{border-color:rgba(200,144,30,0.5);}
+select option{background:var(--bg2);}
+.f{margin-bottom:0.7rem;}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;}
+
+.ebox-ta{width:100%;background:rgba(200,144,30,0.03);border:1px solid var(--brg);border-radius:5px;padding:0.75rem 0.9rem;font-size:12px;line-height:1.75;color:#C0B898;font-family:'DM Sans',sans-serif;resize:vertical;min-height:75px;outline:none;transition:border-color 0.2s;white-space:pre-wrap;}
+.ebox-ta:focus{border-color:rgba(200,144,30,0.55);}
+.ebox-bar{display:flex;align-items:center;gap:0.4rem;margin-top:3px;flex-wrap:wrap;}
+.ebox-lbl{font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--g);flex:1;display:flex;align-items:center;gap:4px;}
+.edot{width:5px;height:5px;border-radius:50%;background:var(--g);}
+.edot.anim{animation:pulse 1.2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+.edit-tag{font-size:9px;color:var(--mu);background:rgba(255,255,255,0.05);border:1px solid var(--br);padding:1px 5px;border-radius:2px;}
+
+.bg{background:var(--g);color:#000;border:none;padding:0.5rem 0.95rem;border-radius:4px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:background 0.2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.bg:hover{background:var(--gl);}
+.bg:disabled{opacity:0.38;cursor:not-allowed;}
+.bs{background:transparent;border:1px solid var(--br);color:var(--su);padding:0.47rem 0.85rem;border-radius:4px;font-size:12px;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.bs:hover{border-color:var(--brg);color:var(--g);}
+.bgh{background:rgba(200,144,30,0.07);border:1px solid var(--brg);color:var(--g);padding:0.32rem 0.7rem;border-radius:4px;font-size:11px;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.bgh:hover{background:rgba(200,144,30,0.15);}
+.brow{display:flex;gap:0.5rem;margin-top:0.7rem;flex-wrap:wrap;align-items:center;}
+.btiny{background:rgba(200,144,30,0.07);border:1px solid var(--brg);color:var(--g);padding:2px 7px;border-radius:3px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btiny:hover{background:rgba(200,144,30,0.16);}
+
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;margin-bottom:0.6rem;}
+.cc{background:rgba(255,255,255,0.03);border:1px solid var(--br);border-radius:5px;padding:0.7rem;position:relative;}
+.ccn{font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-weight:600;color:#D4A854;}
+.ccr{font-size:9px;text-transform:uppercase;letter-spacing:0.07em;color:var(--mu);margin:1px 0 4px;}
+.ccd{font-size:11px;color:var(--su);line-height:1.4;}
+.ccdel{position:absolute;top:4px;right:4px;background:none;border:none;color:var(--mu);cursor:pointer;font-size:11px;padding:2px 5px;}
+.ccdel:hover{color:#E06060;}
+.ccedit{position:absolute;top:4px;right:26px;background:none;border:none;color:var(--mu);cursor:pointer;font-size:10px;padding:2px 5px;}
+.ccedit:hover{color:var(--g);}
+.addcc{width:100%;background:rgba(200,144,30,0.03);border:1px dashed rgba(200,144,30,0.2);border-radius:5px;padding:0.6rem;color:var(--mu);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.addcc:hover{border-color:var(--g);color:var(--g);}
+.cform{background:rgba(255,255,255,0.03);border:1px solid var(--brg);border-radius:5px;padding:0.85rem;margin-top:0.6rem;display:none;}
+
+.beatbar{display:flex;height:20px;border-radius:3px;overflow:hidden;margin-bottom:3px;}
+.ba1,.ba3{flex:0 0 25%;background:#7A5018;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;letter-spacing:0.06em;color:rgba(255,220,120,0.75);}
+.ba2{flex:0 0 50%;background:#4A3010;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:rgba(255,220,120,0.75);border-left:1px solid rgba(0,0,0,0.3);border-right:1px solid rgba(0,0,0,0.3);}
+.blbls{display:flex;font-size:9px;color:var(--mu);margin-bottom:0.75rem;}
+.blbls span{flex:1;text-align:center;}
+.actlbl{font-size:8px;color:var(--g);font-weight:700;background:rgba(200,144,30,0.12);border:1px solid var(--brg);padding:1px 5px;border-radius:2px;margin-bottom:0.3rem;display:inline-block;}
+.si{background:rgba(255,255,255,0.025);border:1px solid var(--br);border-left:3px solid rgba(200,144,30,0.28);border-radius:4px;padding:0.5rem 0.7rem;margin-bottom:0.35rem;transition:border-left-color 0.2s;}
+.si:hover{border-left-color:var(--g);}
+.sih{display:flex;align-items:flex-start;gap:5px;}
+.sin{font-size:9px;color:var(--g);font-weight:700;min-width:14px;padding-top:2px;flex-shrink:0;}
+.si-body{flex:1;}
+.si-loc{font-size:10px;font-weight:500;color:var(--tx);text-transform:uppercase;margin-bottom:1px;}
+.si-desc{font-size:10px;color:var(--mu);line-height:1.35;}
+.si-tools{display:flex;gap:3px;margin-top:4px;}
+.siact{font-size:9px;background:rgba(200,144,30,0.07);border:1px solid var(--brg);color:var(--g);padding:1px 6px;border-radius:3px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.siact:hover{background:rgba(200,144,30,0.16);}
+.siact.danger{color:#E06060;border-color:rgba(220,80,80,0.25);}
+
+.spwrap{max-width:580px;margin:0 auto;}
+.spmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;font-size:11px;color:var(--mu);}
+.spmeta b{color:var(--g);}
+.sp-toolbar{display:flex;gap:0.45rem;margin-bottom:0.6rem;flex-wrap:wrap;align-items:center;}
+.badge{font-size:9px;background:rgba(200,144,30,0.1);border:1px solid var(--brg);color:var(--g);padding:2px 8px;border-radius:20px;}
+.mode-btn{font-size:10px;padding:3px 8px;border-radius:3px;background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--su);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.mode-btn.on{background:rgba(200,144,30,0.1);border-color:var(--brg);color:var(--g);}
+.sppage{background:#F9F7F1;color:#111;border-radius:3px;box-shadow:0 8px 50px rgba(0,0,0,0.65);padding:48px 60px 48px 84px;font-family:'Courier Prime',monospace;font-size:11pt;line-height:1.65;min-height:360px;position:relative;}
+.spnum{position:absolute;top:15px;right:56px;font-family:'Courier Prime',monospace;font-size:10pt;color:#999;}
+.spsh{text-transform:uppercase;font-weight:700;margin:1em 0 0.2em;}
+.spac{margin-bottom:0.5em;}
+.spch{padding-left:36%;text-transform:uppercase;font-weight:700;margin-top:0.8em;margin-bottom:0;}
+.sppa{padding-left:27%;color:#555;font-style:italic;margin-bottom:0;}
+.spdi{padding-left:16%;padding-right:22%;margin-bottom:0.4em;}
+.sptr{text-align:right;text-transform:uppercase;font-weight:700;margin:0.7em 0;}
+.spbl{height:0.18em;}
+.gen-cursor{display:inline-block;background:#C8901E;width:7px;height:12pt;vertical-align:middle;animation:cblink 0.7s step-end infinite;margin-left:1px;}
+@keyframes cblink{0%,100%{opacity:1}50%{opacity:0}}
+.sp-editor{width:100%;background:#F9F7F1;color:#111;border-radius:3px;box-shadow:0 8px 50px rgba(0,0,0,0.65);padding:48px 60px 48px 84px;font-family:'Courier Prime',monospace;font-size:11pt;line-height:1.65;min-height:360px;border:none;outline:none;resize:vertical;}
+.spempty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;text-align:center;}
+.spempty .eico{font-size:1.8rem;opacity:0.11;margin-bottom:0.65rem;}
+.spempty .ettl{font-family:'Courier Prime',monospace;font-size:11pt;color:#999;margin-bottom:0.25rem;}
+.spempty .esub{font-size:10pt;color:#BBB;}
+
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.45rem;}
+.stat{background:rgba(255,255,255,0.03);border:1px solid var(--br);border-radius:4px;padding:0.45rem;text-align:center;}
+.stat-n{font-size:1rem;font-weight:600;color:var(--g);}
+.stat-l{font-size:9px;color:var(--mu);}
+.snav-item{padding:3px 0;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:5px;cursor:pointer;}
+.snav-item:hover .snav-t{color:var(--g);}
+.snav-n{font-size:9px;color:var(--g);font-weight:700;min-width:14px;}
+.snav-t{font-size:10px;color:var(--su);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.pgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.45rem;margin-bottom:0.75rem;}
+.pc{background:rgba(255,255,255,0.03);border:1px solid var(--br);border-radius:5px;padding:0.6rem;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;text-align:left;}
+.pc:hover{border-color:var(--brg);}
+.pc.sel{border-color:var(--g);background:rgba(200,144,30,0.07);}
+.pc-i{font-size:0.9rem;display:block;margin-bottom:2px;}
+.pc-n{font-size:11px;font-weight:500;color:var(--tx);}
+.pc-d{font-size:9px;color:var(--mu);margin-top:1px;line-height:1.3;}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.8rem;}
+.compare-col h4{font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--mu);margin-bottom:0.4rem;}
+.compare-col.after h4{color:var(--g);}
+.sp-compare{background:#F9F7F1;border-radius:3px;padding:0.75rem 0.75rem 0.75rem 1.3rem;font-family:'Courier Prime',monospace;font-size:10pt;color:#444;line-height:1.6;max-height:320px;overflow-y:auto;white-space:pre-wrap;}
+.compare-col.after .sp-compare{color:#111;}
+
+.spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(200,144,30,0.3);border-top-color:var(--g);border-radius:50%;animation:spn 0.7s linear infinite;}
+@keyframes spn{to{transform:rotate(360deg)}}
+.notif{position:fixed;bottom:1rem;right:1rem;background:var(--g);color:#000;padding:0.4rem 1rem;border-radius:4px;font-size:12px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;}
+.notif.on{opacity:1;}
+
+/* ── Footer ── */
+.footer{background:var(--bg2);border-top:1px solid var(--br);padding:1rem 1.5rem;text-align:center;font-size:11px;color:var(--mu);}
+.footer a{color:var(--g);text-decoration:none;}
+
+@media(max-width:700px){
+  .ptgrid{grid-template-columns:1fr 1fr;}
+  .tool{width:100%;min-height:auto;border-right:none;border-bottom:1px solid var(--br);}
+  .panel.script-panel.on{flex-direction:column;}
+  .cgrid,.f2,.pgrid,.compare-grid{grid-template-columns:1fr;}
+  .hd-stat{display:none;}
+  .sppage,.sp-editor{padding:24px 18px 24px 22px;}
+}
+</style>
 </head>
 <body>
 
-<noscript>
-  <div class="noscript">
-    <div class="noscript-logo">Scene<em>Craft</em></div>
-    <p>SceneCraft Studio requires JavaScript. Please enable it in your browser to continue.</p>
-  </div>
-</noscript>
-
-<!-- ══════════════════════════════════════
-     LOADING SPLASH
-══════════════════════════════════════ -->
-<div class="splash" id="splash" aria-hidden="true">
-  <div class="splash-inner">
-    <div class="splash-logo">Scene<em>Craft</em></div>
-    <div class="splash-bar"><div class="splash-fill"></div></div>
-    <div class="splash-sub">Loading Studio…</div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     PROJECT SELECT SCREEN
-══════════════════════════════════════ -->
+<!-- ══════════════════════════════
+     PROJECT SELECT
+══════════════════════════════ -->
 <div class="screen on" id="scr-select">
-  <div class="sel-bg-orbs">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
+<div class="sel-inner">
+  <div class="sel-eyebrow">SceneCraft Studio</div>
+  <h1 class="sel-h1">What are you <em>creating?</em></h1>
+  <p class="sel-sub">Select your project type and the studio tailors every tool — formatting, structure, terminology, and AI assistance — to your exact format.</p>
+
+  <div class="ptgrid" id="ptGrid">
+    <button class="ptcard" data-type="feature" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">🎬</span>
+      <div class="pt-name">Feature Film</div>
+      <div class="pt-sub">80–120 page screenplay. 3-act Hollywood structure.</div>
+    </button>
+    <button class="ptcard" data-type="short" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">🎞</span>
+      <div class="pt-name">Short Film</div>
+      <div class="pt-sub">Under 40 pages. Festival-ready format.</div>
+    </button>
+    <button class="ptcard" data-type="tv" onclick="selType(this)">
+      <div class="pt-check">✓</div><div class="pt-tag">Series</div><span class="pt-ico">📺</span>
+      <div class="pt-name">TV Show</div>
+      <div class="pt-sub">Episodic drama or comedy. Pilot or spec script.</div>
+    </button>
+    <button class="ptcard" data-type="doc" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">🎙</span>
+      <div class="pt-name">Documentary</div>
+      <div class="pt-sub">Treatment, shooting script, or narration.</div>
+    </button>
+    <button class="ptcard" data-type="web" onclick="selType(this)">
+      <div class="pt-check">✓</div><div class="pt-tag">Digital</div><span class="pt-ico">📱</span>
+      <div class="pt-name">Web Series</div>
+      <div class="pt-sub">Short episodic content for YouTube, TikTok, streaming.</div>
+    </button>
+    <button class="ptcard" data-type="animation" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">✏️</span>
+      <div class="pt-name">Animation</div>
+      <div class="pt-sub">Animated feature, series, or short.</div>
+    </button>
+    <button class="ptcard" data-type="commercial" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">📣</span>
+      <div class="pt-name">Commercial / Ad</div>
+      <div class="pt-sub">15s to 3-min brand video scripts.</div>
+    </button>
+    <button class="ptcard" data-type="miniseries" onclick="selType(this)">
+      <div class="pt-check">✓</div><div class="pt-tag">Limited</div><span class="pt-ico">🎭</span>
+      <div class="pt-name">Mini-Series</div>
+      <div class="pt-sub">Limited series 2–8 episodes. Streaming format.</div>
+    </button>
+    <button class="ptcard" data-type="stage" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">🎪</span>
+      <div class="pt-name">Stage Play</div>
+      <div class="pt-sub">Theater script. One-act to full play.</div>
+    </button>
+    <button class="ptcard" data-type="podcast" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">🎧</span>
+      <div class="pt-name">Audio Drama</div>
+      <div class="pt-sub">Podcast script or radio play. Sound-first format.</div>
+    </button>
+    <button class="ptcard" data-type="music" onclick="selType(this)">
+      <div class="pt-check">✓</div><span class="pt-ico">🎵</span>
+      <div class="pt-name">Music Video</div>
+      <div class="pt-sub">Narrative or performance-based. Treatment format.</div>
+    </button>
+    <button class="ptcard" data-type="pilot" onclick="selType(this)">
+      <div class="pt-check">✓</div><div class="pt-tag">Spec</div><span class="pt-ico">🚀</span>
+      <div class="pt-name">TV Pilot</div>
+      <div class="pt-sub">Series premiere episode. Network or streaming spec.</div>
+    </button>
   </div>
 
-  <header class="sel-header">
-    <div class="sel-brand">Scene<em>Craft</em> Studio</div>
-    <div class="sel-header-r">
-      <div class="sel-ver">v2.0</div>
-      <button class="user-pill sel-user-pill" id="userPillSel" type="button" onclick="onUserPillClick()">
-        <span class="user-avatar" id="userAvatarSel" aria-hidden="true">?</span>
-        <span class="user-label" id="userLabelSel">Sign in</span>
-      </button>
-    </div>
-  </header>
-
-  <div class="sel-inner">
-    <div class="sel-hero">
-      <div class="sel-eyebrow"><span class="sel-ey-line"></span>SceneCraft Studio<span class="sel-ey-line"></span></div>
-      <h1 class="sel-h1">What are you <em>creating?</em></h1>
-      <p class="sel-sub">Select your project type and the studio will tailor every tool — formatting, structure, terminology, and AI assistance — to your format.</p>
-    </div>
-
-    <section class="drafts-section" id="draftsSection" hidden aria-labelledby="draftsHeading">
-      <div class="drafts-head">
-        <h2 class="drafts-h" id="draftsHeading">Continue working</h2>
-        <button class="drafts-new" type="button" onclick="newProject()">+ New project</button>
-      </div>
-      <div class="drafts-grid" id="draftsGrid"></div>
-    </section>
-
-    <div class="ptgrid" id="ptGrid" role="list" aria-label="Project type">
-      <button class="ptcard" type="button" aria-pressed="false" data-type="feature" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">🎬</span>
-        <div class="pt-name">Feature Film</div>
-        <div class="pt-sub">Full-length screenplay, 80–120 pages. 3-act structure, Hollywood format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="short" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">🎞</span>
-        <div class="pt-name">Short Film</div>
-        <div class="pt-sub">Compact narrative, under 40 pages. Festival-ready format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="tv" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <div class="pt-tag">Series</div>
-        <span class="pt-ico">📺</span>
-        <div class="pt-name">TV Show</div>
-        <div class="pt-sub">Episodic drama or comedy. Pilot, spec script, or full season.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="doc" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">🎙</span>
-        <div class="pt-name">Documentary</div>
-        <div class="pt-sub">Treatment, shooting script, or narration. Interview-based or cinematic.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="web" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <div class="pt-tag">Digital</div>
-        <span class="pt-ico">📱</span>
-        <div class="pt-name">Web Series</div>
-        <div class="pt-sub">Short episodic content. YouTube, TikTok, streaming platform.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="animation" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">✏️</span>
-        <div class="pt-name">Animation</div>
-        <div class="pt-sub">Animated feature, series, or short. Specialized action line format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="commercial" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">📣</span>
-        <div class="pt-name">Commercial / Ad</div>
-        <div class="pt-sub">15s to 3-min video scripts. Brand storytelling, broadcast format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="miniseries" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <div class="pt-tag">Limited</div>
-        <span class="pt-ico">🎭</span>
-        <div class="pt-name">Mini-Series</div>
-        <div class="pt-sub">Limited series 2–8 episodes. Streaming platform format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="stage" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">🎪</span>
-        <div class="pt-name">Stage Play</div>
-        <div class="pt-sub">Theater script. One-act to full play. Stage direction format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="podcast" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">🎧</span>
-        <div class="pt-name">Audio Drama</div>
-        <div class="pt-sub">Podcast script or radio play. Sound-first storytelling format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="music" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <span class="pt-ico">🎵</span>
-        <div class="pt-name">Music Video</div>
-        <div class="pt-sub">Narrative or performance-based. Shot list & treatment format.</div>
-      </button>
-
-      <button class="ptcard" type="button" aria-pressed="false" data-type="pilot" onclick="selType(this)">
-        <div class="pt-check">✓</div>
-        <div class="pt-glow"></div>
-        <div class="pt-tag">Spec</div>
-        <span class="pt-ico">🚀</span>
-        <div class="pt-name">TV Pilot</div>
-        <div class="pt-sub">Series premiere episode. Network or streaming spec format.</div>
-      </button>
-    </div>
-
-    <!-- SUB-FORMAT PILLS -->
-    <div id="fmtRow" class="fmt-row" style="display:none;">
-      <span class="fmt-lbl" id="fmtLbl">Format:</span>
-    </div>
-
-    <div class="sel-cta">
-      <button class="cta-btn" id="ctaBtn" type="button" onclick="startApp()" aria-disabled="true">
-        <span class="cta-ico" id="ctaIco" aria-hidden="true">✦</span>
-        <span>Start Writing</span>
-        <span class="cta-arrow" aria-hidden="true">→</span>
-      </button>
-      <span class="cta-hint" id="ctaHint">Select a project type above to begin</span>
-    </div>
-
-    <div class="restore-toast" id="restoreToast" role="status" hidden>
-      <span class="restore-msg" id="restoreMsg">A previous draft was found.</span>
-      <button class="restore-yes" type="button" onclick="restoreDraft()">Restore</button>
-      <button class="restore-no" type="button" onclick="dismissRestore()">Start fresh</button>
-    </div>
+  <div id="fmtRow" class="fmt-row" style="display:none;">
+    <span class="fmt-lbl" id="fmtLbl">Format:</span>
   </div>
 
-  <footer class="sel-footer">
-    <span>SceneCraft Studio © 2026</span>
-    <span class="sel-footer-dot" aria-hidden="true">·</span>
-    <span>AI-Powered Screenwriting</span>
-  </footer>
+  <div class="sel-cta">
+    <button class="cta-btn" id="ctaBtn" onclick="startApp()">
+      <span id="ctaIco">✦</span> Start Writing
+    </button>
+    <span class="cta-hint" id="ctaHint">Select a project type above to begin</span>
+  </div>
+</div>
 </div>
 
-<!-- ══════════════════════════════════════
+<!-- ══════════════════════════════
      APP SCREEN
-══════════════════════════════════════ -->
+══════════════════════════════ -->
 <div class="screen" id="scr-app">
-
-  <!-- HEADER -->
-  <header class="hd">
-    <button class="hd-menu-btn" id="hdMenuBtn" type="button" onclick="toggleMobileMenu()"
-            aria-label="Open navigation" aria-expanded="false" aria-controls="mobileNav">
-      <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
-    </button>
-    <div class="brand">Scene<em>Craft</em></div>
-    <nav class="tabs" id="tabNav" role="tablist" aria-label="Studio sections"></nav>
+  <div class="hd">
+    <div class="brand">Scene<em>Craft</em> Studio</div>
+    <nav class="tabs" id="tabNav"></nav>
     <div class="hd-r">
-      <div class="hd-stat" id="hdStat" aria-live="off"></div>
-      <div class="hd-quota" id="hdQuota" hidden></div>
-      <button class="xbtn" type="button" onclick="doExport()" aria-label="Export script">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span class="xbtn-text">Export</span>
-      </button>
-      <button class="user-pill" id="userPill" type="button" onclick="onUserPillClick()">
-        <span class="user-avatar" id="userAvatar" aria-hidden="true">?</span>
-        <span class="user-label" id="userLabel">Sign in</span>
-      </button>
+      <div class="hd-stat" id="hdStat"></div>
+      <button class="xbtn" onclick="doExport()">↓ Export</button>
     </div>
-  </header>
-
-  <!-- Mobile Nav Overlay -->
-  <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileMenu()" aria-hidden="true"></div>
-  <div class="mobile-nav" id="mobileNav" role="dialog" aria-label="Navigation" aria-modal="false" aria-hidden="true">
-    <div class="mobile-nav-header">
-      <div class="brand">Scene<em>Craft</em></div>
-      <button class="mobile-nav-close" type="button" onclick="toggleMobileMenu()" aria-label="Close navigation">✕</button>
-    </div>
-    <div class="mobile-nav-tabs" id="mobileTabNav" role="tablist" aria-label="Studio sections (mobile)"></div>
-    <div class="mobile-nav-stats" id="mobileStats"></div>
-    <button class="mobile-nav-export" type="button" onclick="doExport();toggleMobileMenu();">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export Script
-    </button>
   </div>
-
-  <div class="err-banner" id="errBanner" role="alert" hidden>
-    <span class="err-icon" aria-hidden="true">⚠</span>
-    <span class="err-msg" id="errMsg"></span>
-    <button class="err-retry" id="errRetry" type="button">Retry</button>
-    <button class="err-close" id="errClose" type="button" aria-label="Dismiss error">✕</button>
-  </div>
-
-  <div class="notif" id="notif" role="status" aria-live="polite"></div>
-
-  <!-- PANELS -->
+  <div class="notif" id="notif"></div>
   <div id="panelsContainer"></div>
+  <div class="footer">SceneCraft Studio &mdash; Powered by <a href="https://anthropic.com" target="_blank">Claude AI</a> &mdash; <span style="cursor:pointer;color:var(--g);" onclick="goSelect()">Change Project Type</span></div>
 </div>
 
-<!-- ══════════════════════════════════════
-     AUTH MODAL
-══════════════════════════════════════ -->
-<div class="auth-overlay" id="authOverlay" hidden onclick="closeAuth(event)">
-  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle" onclick="event.stopPropagation()">
-    <button class="auth-close" type="button" onclick="closeAuth()" aria-label="Close sign in">✕</button>
-    <div class="auth-brand">Scene<em>Craft</em></div>
-    <h2 class="auth-title" id="authTitle">Sign in to continue</h2>
-    <p class="auth-sub" id="authSub">AI generation requires an account so we can keep your drafts safe and prevent abuse.</p>
+<script>
+// ══════════════════════════════
+//  PROJECT TYPE CONFIG
+// ══════════════════════════════
+const PT = {
+  feature:{ico:'🎬',name:'Feature Film',fmt:['Screenplay','Spec Script','Shooting Script'],
+    tabs:['Story','Cast','Outline','Script','Polish'],
+    structures:['3-Act Structure','Hero\'s Journey','Save the Cat','5-Act Structure','Non-linear'],
+    unitLabel:'Scenes',unitSingular:'Scene',sceneNums:[10,15,20,25],defaultScenes:15,
+    pages:'90–120 pages',runtime:'90–120 min',
+    loglineHint:'A [flawed protagonist] must [impossible goal] before [devastating consequence].',
+    extraFields:[{id:'budget',label:'Budget Range',type:'select',opts:['Micro (<$50k)','Low ($50k–$1M)','Mid ($1M–$10M)','High ($10M+)']}],
+    beatLabels:['ACT I','ACT II','ACT III'],beatSubs:['Setup 25%','Confrontation 50%','Resolution 25%'],
+    scriptSys:`You are an award-winning Hollywood screenwriter. Write in strict professional screenplay format: FADE IN:, INT./EXT. scene headings ALL CAPS, action lines present tense, character names ALL CAPS centered before dialogue, proper parentheticals, CUT TO: transitions. Make it cinematic and emotionally compelling.`
+  },
+  short:{ico:'🎞',name:'Short Film',fmt:['Drama Short','Comedy Short','Experimental','Thriller Short','Horror Short'],
+    tabs:['Story','Cast','Outline','Script','Polish'],
+    structures:['3-Act (Compact)','Single Scene','Vignette','Non-linear'],
+    unitLabel:'Scenes',unitSingular:'Scene',sceneNums:[3,5,7,10],defaultScenes:5,
+    pages:'5–40 pages',runtime:'5–40 min',
+    loglineHint:'A [character] encounters [situation] that leads to [outcome or revelation].',
+    extraFields:[{id:'fest',label:'Target Festival',type:'select',opts:['Sundance','TIFF','Cannes','Tribeca','Pan-African Film Festival','Local Festival']}],
+    beatLabels:['SETUP','CONFLICT','RESOLUTION'],beatSubs:['Setup 30%','Conflict 40%','Resolution 30%'],
+    scriptSys:`You are a short film specialist screenwriter. Write concise, impactful screenplay in professional format. Every line must earn its place. FADE IN:, proper slug lines, action, character names ALL CAPS before dialogue.`
+  },
+  tv:{ico:'📺',name:'TV Show',fmt:['Drama (1hr)','Comedy (30 min)','Procedural','Anthology','Reality'],
+    tabs:['Concept','Characters','Episode Outline','Script','Polish'],
+    structures:['Pilot Episode','Spec Episode','Season Bible','Episode Outline Only'],
+    unitLabel:'Acts/Scenes',unitSingular:'Act',sceneNums:[4,5,6,7],defaultScenes:5,
+    pages:'22–60 pages',runtime:'22–60 min',
+    loglineHint:'In a world where [premise], one [protagonist] must [goal] each week.',
+    extraFields:[{id:'network',label:'Network / Platform',type:'select',opts:['HBO/Max','Netflix','Amazon','Apple TV+','BBC','NTV Uganda','KTN','Local Network']}],
+    beatLabels:['ACT 1','ACT 2','ACT 3','ACT 4'],beatSubs:['Cold Open','Rising','Climax','Tag'],
+    scriptSys:`You are a professional TV writer with credits on major network and streaming shows. Write in TV screenplay format: COLD OPEN if applicable, ACT ONE/TWO tags, INT./EXT. slug lines, proper tag scenes. Professional broadcast standard.`
+  },
+  doc:{ico:'🎙',name:'Documentary',fmt:['Observational','Interview-Based','Narrated','Cinéma Vérité','Historical'],
+    tabs:['Concept','Subjects','Structure','Script','Polish'],
+    structures:['Narrative Arc','Chronological','Thematic','Interview-Driven','Hybrid'],
+    unitLabel:'Segments',unitSingular:'Segment',sceneNums:[5,8,10,12],defaultScenes:8,
+    pages:'Variable',runtime:'20–120 min',
+    loglineHint:'A documentary exploring [subject] that reveals [unexpected truth or journey].',
+    extraFields:[{id:'pov',label:'Point of View',type:'select',opts:['Fly-on-the-wall','Filmmaker as subject','Multiple subjects','Archival-led','Narrator-driven']}],
+    beatLabels:['OPEN','BODY','RESOLUTION'],beatSubs:['Hook & Setup','Investigation','Revelation & Conclusion'],
+    scriptSys:`You are an experienced documentary writer and director. Write in documentary script format: narration (V.O.), interview cues (INTERVIEWEE, ON CAMERA), scene descriptions, B-ROLL directions (B-ROLL: ...), archival notes. Clear, purposeful, journalistic but cinematic.`
+  },
+  web:{ico:'📱',name:'Web Series',fmt:['Drama','Comedy','Thriller','Mockumentary','Tutorial/Edu'],
+    tabs:['Concept','Cast','Episodes','Script','Polish'],
+    structures:['Episodic','Serialized','Standalone','Hybrid'],
+    unitLabel:'Episodes',unitSingular:'Episode',sceneNums:[4,6,8,10],defaultScenes:6,
+    pages:'3–15 pages/ep',runtime:'5–20 min/ep',
+    loglineHint:'A [show concept] told in [X] short episodes for [platform/audience].',
+    extraFields:[{id:'platform',label:'Platform',type:'select',opts:['YouTube','TikTok','Instagram','Facebook Watch','Streaming Only','Festival Circuit']}],
+    beatLabels:['HOOK','MIDDLE','END'],beatSubs:['Hook fast','Story','Cliffhanger'],
+    scriptSys:`You are a web series writer who understands digital-first storytelling. Write punchy, visual screenplay format. Hook the viewer in the first 15 seconds. Dialogue is tight. Format: slug lines, short action blocks, ALL CAPS character names before dialogue.`
+  },
+  animation:{ico:'✏️',name:'Animation',fmt:['Animated Feature','Animated Series','Animated Short','Stop-Motion'],
+    tabs:['Story','Characters','Outline','Script','Polish'],
+    structures:['3-Act (Family)','3-Act (Adult)','Non-linear','Adventure Arc'],
+    unitLabel:'Sequences',unitSingular:'Sequence',sceneNums:[8,12,15,20],defaultScenes:12,
+    pages:'80–120 pages',runtime:'80–120 min',
+    loglineHint:'In a world of [animated setting], a [character] must [quest] to [ultimate goal].',
+    extraFields:[{id:'rating',label:'Target Rating',type:'select',opts:['G / Family','PG / All Ages','PG-13','R / Adult Animation']}],
+    beatLabels:['ACT I','ACT II','ACT III'],beatSubs:['Ordinary World','Adventure','Resolution'],
+    scriptSys:`You are a professional animation screenwriter. Use standard screenplay format but note action lines describe what is ANIMATED — visual gags, physical comedy, impossible action. Be highly visual and descriptive. Character names ALL CAPS, dialogue concise and character-specific.`
+  },
+  commercial:{ico:'📣',name:'Commercial / Ad',fmt:['Brand Film','30-Second Spot','60-Second','Product Demo','Social Media Ad','PSA'],
+    tabs:['Brief','Talent','Storyboard','Script','Polish'],
+    structures:['Narrative Ad','Product Demo','Testimonial','Emotional Brand Film','Comedy Spot'],
+    unitLabel:'Shots',unitSingular:'Shot',sceneNums:[5,8,10,15],defaultScenes:8,
+    pages:'1–5 pages',runtime:'15s–3 min',
+    loglineHint:'A [brand story] that makes the viewer feel [emotion] and inspires them to [action].',
+    extraFields:[{id:'brand',label:'Brand / Product',type:'text',placeholder:'e.g. MTN Uganda'},{id:'cta',label:'Call to Action',type:'text',placeholder:'e.g. Visit mtnonline.com'}],
+    beatLabels:['HOOK','STORY','CTA'],beatSubs:['Grab attention','Build emotion','Drive action'],
+    scriptSys:`You are an award-winning commercial screenwriter. Write tight, visual ad scripts. Every second counts. Hook within 3 seconds, emotional payoff, clear CTA. Use VISUAL: / AUDIO: / VO: format or standard screenplay style.`
+  },
+  miniseries:{ico:'🎭',name:'Mini-Series',fmt:['2 Episodes','4 Episodes','6 Episodes','8 Episodes'],
+    tabs:['Concept','Characters','Episode Arc','Script','Polish'],
+    structures:['2-Part','4-Part','6-Part','8-Part'],
+    unitLabel:'Episodes',unitSingular:'Episode',sceneNums:[2,4,6,8],defaultScenes:4,
+    pages:'45–60 pages/ep',runtime:'45–60 min/ep',
+    loglineHint:'A limited series about [premise] told across [X] episodes, exploring [theme].',
+    extraFields:[{id:'streamer',label:'Target Platform',type:'select',opts:['Netflix','HBO','Amazon','Apple TV+','BBC','Local Broadcast']}],
+    beatLabels:['EP 1','EPS 2–N','FINAL','CODA'],beatSubs:['Establish','Escalate','Climax','Resolve'],
+    scriptSys:`You are a prestige television mini-series writer. Write in professional TV screenplay format. Build rich character arcs. Each episode ends on a compelling hook. Format: ACT ONE/TWO headers, proper slug lines, ALL CAPS character names before dialogue.`
+  },
+  stage:{ico:'🎪',name:'Stage Play',fmt:['Full-Length Play','One-Act','Monologue','Two-Hander','Musical'],
+    tabs:['Concept','Characters','Scenes','Script','Polish'],
+    structures:['Full-Length (2 Act)','One-Act','Short Play','Monologue'],
+    unitLabel:'Scenes',unitSingular:'Scene',sceneNums:[3,5,8,10],defaultScenes:5,
+    pages:'30–100 pages',runtime:'30–120 min',
+    loglineHint:'A stage play exploring [theme] through [characters] in [setting].',
+    extraFields:[{id:'venue',label:'Venue Type',type:'select',opts:['Black Box','Proscenium Stage','Thrust Stage','Site-Specific','Open Air']}],
+    beatLabels:['ACT ONE','ACT TWO'],beatSubs:['Establish & Rising Action','Climax & Resolution'],
+    scriptSys:`You are a professional playwright. Write in standard stage play format: Character names bold/centered, stage directions in (parentheses), scene headings describe SETTING: and LIGHTING:. Dialogue is everything. Actions serve the text.`
+  },
+  podcast:{ico:'🎧',name:'Audio Drama',fmt:['Podcast Drama','Radio Play','Audio Fiction','Narrated Story'],
+    tabs:['Concept','Characters','Episodes','Script','Polish'],
+    structures:['Episodic Drama','Anthology','Serial Fiction','Radio Play'],
+    unitLabel:'Episodes',unitSingular:'Episode',sceneNums:[3,5,8,10],defaultScenes:5,
+    pages:'10–40 pages/ep',runtime:'20–60 min/ep',
+    loglineHint:'An audio drama about [premise] told through [POV or structure].',
+    extraFields:[{id:'pov',label:'Narration Style',type:'select',opts:['First Person Narrator','Omniscient','Found Footage Audio','Multiple POV','No Narration']}],
+    beatLabels:['OPEN','MID','CLOSE'],beatSubs:['Establish sound world','Story','Resolution'],
+    scriptSys:`You are an audio drama and podcast script writer. Write in audio-first format: SOUND: for sound effects, MUSIC: for music cues, character names ALL CAPS before dialogue, narration as NARRATOR (V.O.):. No visual descriptions — everything must work through sound and voice alone.`
+  },
+  music:{ico:'🎵',name:'Music Video',fmt:['Narrative','Performance','Conceptual','Lyric Video','Documentary Style'],
+    tabs:['Treatment','Talent','Shot List','Script','Polish'],
+    structures:['Narrative Story','Performance-Based','Hybrid','Conceptual/Art'],
+    unitLabel:'Shots',unitSingular:'Shot',sceneNums:[5,8,12,15],defaultScenes:8,
+    pages:'2–8 pages',runtime:'3–6 min',
+    loglineHint:'A music video that visualizes [song theme] through [visual concept or story].',
+    extraFields:[{id:'artist',label:'Artist / Band',type:'text',placeholder:'e.g. Eddy Kenzo'},{id:'song',label:'Song Title',type:'text',placeholder:'e.g. Stamina'}],
+    beatLabels:['VERSE','CHORUS','BRIDGE'],beatSubs:['Establish','Peak','Resolution'],
+    scriptSys:`You are a music video director and treatment writer. Write in music video script format: SHOT: descriptions, LYRICS CUE: timing markers, VISUAL: concept descriptions, PERFORMANCE: directions. Be highly visual, stylistic, and cinematic.`
+  },
+  pilot:{ico:'🚀',name:'TV Pilot',fmt:['Network Drama (60 min)','Network Comedy (30 min)','Cable Drama','Streaming Drama'],
+    tabs:['Concept','Characters','Outline','Script','Polish'],
+    structures:['Network Broadcast','Cable','Streaming (Netflix/HBO)','Premium Cable'],
+    unitLabel:'Acts',unitSingular:'Act',sceneNums:[4,5,6,7],defaultScenes:5,
+    pages:'22–65 pages',runtime:'22–65 min',
+    loglineHint:'A pilot that establishes [world], introduces [protagonist], and poses the [series question].',
+    extraFields:[{id:'netw',label:'Target Network',type:'select',opts:['NBC/CBS/ABC','HBO/Showtime','Netflix','Amazon','FX','Local TV']}],
+    beatLabels:['COLD OPEN','ACT 1','ACT 2','TAG'],beatSubs:['Hook','Establish','Rising Action','Close'],
+    scriptSys:`You are a professional TV pilot writer. Write a compelling pilot that establishes the world, introduces all series regulars, poses the central series question, and makes the viewer desperate to see episode 2. Professional broadcast format: COLD OPEN, ACT ONE header, slug lines, character names ALL CAPS.`
+  }
+};
 
-    <button class="auth-google" type="button" onclick="doGoogleSignIn()">
-      <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
-        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C33.9 6.1 29.2 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"/>
-        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7C33.9 6.1 29.2 4 24 4 16.4 4 9.8 8.4 6.3 14.7z"/>
-        <path fill="#4CAF50" d="M24 44c5.1 0 9.8-2 13.3-5.2l-6.2-5.2C29 35.4 26.6 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.7 39.5 16.3 44 24 44z"/>
-        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.2 5.2C40.7 35.4 44 30.1 44 24c0-1.2-.1-2.4-.4-3.5z"/>
-      </svg>
-      Continue with Google
-    </button>
+// ══════════════════════════════
+//  STATE
+// ══════════════════════════════
+let selectedType=null,selectedFmt=null;
+let S={title:'',logline:'',setting:'',themes:'',protagonist:'',conflict:'',tone:'',extra:{},cast:[],scenes:[],script:''};
+let isGen=false,viewMode='preview',polType=null,editingCharIdx=-1;
 
-    <div class="auth-divider"><span>or</span></div>
+// ══════════════════════════════
+//  PROJECT SELECT
+// ══════════════════════════════
+function selType(btn){
+  document.querySelectorAll('.ptcard').forEach(c=>c.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedType=btn.dataset.type;selectedFmt=null;
+  const cfg=PT[selectedType];
+  const row=document.getElementById('fmtRow');
+  const lbl=document.getElementById('fmtLbl');
+  row.style.display='flex';lbl.textContent='Format:';
+  row.querySelectorAll('.fpill').forEach(p=>p.remove());
+  cfg.fmt.forEach(f=>{
+    const p=document.createElement('button');p.className='fpill';p.textContent=f;
+    p.onclick=()=>{row.querySelectorAll('.fpill').forEach(x=>x.classList.remove('sel'));p.classList.add('sel');selectedFmt=f;};
+    row.appendChild(p);
+  });
+  row.querySelector('.fpill')?.click();
+  const cta=document.getElementById('ctaBtn');cta.classList.add('ready');
+  document.getElementById('ctaIco').textContent=cfg.ico;
+  document.getElementById('ctaHint').textContent=cfg.pages+' · '+cfg.runtime;
+}
 
-    <form class="auth-form" id="authForm" onsubmit="doEmailAuth(event)">
-      <div class="auth-tabs">
-        <button class="auth-tab on" type="button" id="authTabIn" onclick="setAuthMode('signin')">Sign in</button>
-        <button class="auth-tab" type="button" id="authTabUp" onclick="setAuthMode('signup')">Create account</button>
-      </div>
-      <label class="auth-label" for="authEmail">Email</label>
-      <input class="auth-input" id="authEmail" name="email" type="email" autocomplete="email" required/>
-      <label class="auth-label" for="authPwd">Password</label>
-      <input class="auth-input" id="authPwd" name="password" type="password" autocomplete="current-password" minlength="6" required/>
-      <div class="auth-err" id="authErr" role="alert" hidden></div>
-      <button class="auth-submit" type="submit" id="authSubmit">Sign in</button>
-      <button class="auth-forgot" type="button" id="authForgot" onclick="doResetPassword()">Forgot password?</button>
-    </form>
+function startApp(){
+  if(!selectedType)return;
+  buildApp();
+  document.getElementById('scr-select').classList.remove('on');
+  document.getElementById('scr-app').classList.add('on');
+}
+
+function goSelect(){
+  document.getElementById('scr-app').classList.remove('on');
+  document.getElementById('scr-select').classList.add('on');
+}
+
+// ══════════════════════════════
+//  BUILD APP
+// ══════════════════════════════
+function buildApp(){
+  const cfg=PT[selectedType];
+  document.getElementById('tabNav').innerHTML=cfg.tabs.map((t,i)=>`
+    <button class="tab ${i===0?'on':''}" data-ti="${i}" onclick="go(${i})">
+      <span class="tn">${i+1}</span>${t}
+    </button>`).join('');
+  document.getElementById('hdStat').innerHTML=`Pages:<b id="h-pg">0</b> ${cfg.unitLabel}:<b id="h-sc">0</b> Cast:<b id="h-ca">0</b>`;
+  buildPanels(cfg);
+}
+
+function buildPanels(cfg){
+  const c=document.getElementById('panelsContainer');
+  c.innerHTML=panel0(cfg)+panel1(cfg)+panel2(cfg)+panel3(cfg)+panel4(cfg);
+  renderCast();updateStats();renderSceneNav();
+}
+
+function extraHTML(cfg){
+  return cfg.extraFields.map(f=>`
+    <div class="f"><span class="lbl">${f.label}</span>
+      ${f.type==='select'
+        ?`<select id="ef-${f.id}" onchange="syncS()">${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
+        :`<input type="text" id="ef-${f.id}" placeholder="${f.placeholder||''}" oninput="syncS()"/>`}
+    </div>`).join('');
+}
+
+function panel0(cfg){return`<div class="panel on" id="p-0"><div class="pg">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+    <span style="font-size:1.3rem;">${cfg.ico}</span>
+    <div><div style="font-size:13px;font-weight:600;color:var(--tx);">${cfg.name}${selectedFmt?' — '+selectedFmt:''}</div>
+    <div style="font-size:10px;color:var(--mu);">${cfg.pages} · ${cfg.runtime} · <span style="color:var(--g);cursor:pointer;" onclick="goSelect()">Change project type</span></div></div>
   </div>
-</div>
+  <div class="ttl">${cfg.tabs[0]}</div>
+  <div class="sub">Start here — or jump to any tab at any time. Nothing is locked.</div>
+  <div class="tip">${cfg.loglineHint}</div>
+  <div class="f2">
+    <div class="f"><span class="lbl">Title</span><input id="s-title" type="text" placeholder="Working title..." oninput="syncS()"/></div>
+    <div class="f"><span class="lbl">Genre</span><select id="s-genre" onchange="syncS()">
+      <option value="">Select...</option><option>Drama</option><option>Thriller</option><option>Crime</option>
+      <option>Action</option><option>Horror</option><option>Sci-Fi</option><option>Comedy</option>
+      <option>Romance</option><option>Historical</option><option>Mystery</option><option>Western</option><option>Hybrid</option>
+    </select></div>
+  </div>
+  <div class="f"><span class="lbl">Logline / Premise</span><textarea id="s-logline" oninput="syncS()" style="min-height:58px;" placeholder="${cfg.loglineHint}"></textarea></div>
+  <div class="f2">
+    <div class="f"><span class="lbl">World & Setting</span><input id="s-set" type="text" oninput="syncS()" placeholder="Time, place, world..."/></div>
+    <div class="f"><span class="lbl">Themes</span><input id="s-themes" type="text" oninput="syncS()" placeholder="e.g. identity, betrayal..."/></div>
+  </div>
+  <div class="f2">
+    <div class="f"><span class="lbl">Protagonist</span><input id="s-proto" type="text" oninput="syncS()" placeholder="Who is your hero?"/></div>
+    <div class="f"><span class="lbl">Central Conflict</span><input id="s-conf" type="text" oninput="syncS()" placeholder="Core struggle?"/></div>
+  </div>
+  ${cfg.extraFields.length?`<div class="f2">${extraHTML(cfg)}</div>`:''}
+  <div class="f"><span class="lbl">Tone</span><select id="s-tone" onchange="syncS()">
+    <option>Cinematic & serious</option><option>Dark & atmospheric</option><option>Gritty & realistic</option>
+    <option>Fast-paced & kinetic</option><option>Warm & emotional</option><option>Witty & sharp</option>
+    <option>Epic & sweeping</option><option>Playful & comedic</option>
+  </select></div>
+  <div class="brow">
+    <button class="bg" onclick="devStory()"><span class="spin" id="sp1" style="display:none"></span>✦ Develop with AI</button>
+    <button class="bs" onclick="go(1)">→ ${cfg.tabs[1]}</button>
+    <button class="bs" onclick="go(3)">→ Jump to Script</button>
+  </div>
+  <div id="ab1-wrap" style="display:none;margin-top:0.9rem;">
+    <div class="ebox-bar">
+      <span class="ebox-lbl"><div class="edot" id="ab1dot"></div>AI Analysis <span class="edit-tag">✏ editable</span></span>
+      <button class="btiny" onclick="devStory()">Regen</button>
+      <button class="btiny" onclick="go(1)">→ ${cfg.tabs[1]}</button>
+    </div>
+    <textarea class="ebox-ta" id="ab1t" placeholder="AI notes will appear here..."></textarea>
+  </div>
+</div></div>`;}
 
-<script src="firebase-config.js"></script>
-<script type="module" src="firebase-init.js"></script>
-<script defer src="app.js"></script>
+function castRoleOpts(){
+  const t=selectedType;
+  if(t==='doc') return['Subject','Interviewee','Expert','Narrator','Protagonist Subject'].map(o=>`<option>${o}</option>`).join('');
+  if(t==='commercial') return['Hero/Lead','Brand Ambassador','Supporting Actor','Voiceover'].map(o=>`<option>${o}</option>`).join('');
+  return['Protagonist','Antagonist','Supporting','Mentor','Love Interest','Anti-Hero','Comic Relief'].map(o=>`<option>${o}</option>`).join('');
+}
+
+function panel1(cfg){
+  const cl=selectedType==='doc'?'Subjects & Interviewees':selectedType==='commercial'?'Talent & Roles':'Characters';
+  return`<div class="panel" id="p-1"><div class="pg">
+  <div class="ttl">${cfg.tabs[1]}</div>
+  <div class="sub">Add ${cl.toLowerCase()} manually or let AI suggest them. All cards are editable.</div>
+  <div class="brow" style="margin-bottom:0.85rem;">
+    <button class="bg" onclick="aiCast()"><span class="spin" id="sp2" style="display:none"></span>✦ AI Suggest ${cl}</button>
+    <button class="bs" onclick="openCF()">+ Add Manually</button>
+  </div>
+  <div id="ab2-wrap" style="display:none;margin-bottom:0.75rem;">
+    <div class="ebox-bar">
+      <span class="ebox-lbl"><div class="edot" id="ab2dot"></div>AI Suggestions <span class="edit-tag">✏ editable</span></span>
+      <button class="btiny" onclick="aiCast()">Regen</button>
+      <button class="btiny" onclick="parseSuggAndAdd()">+ Import</button>
+    </div>
+    <textarea class="ebox-ta" id="ab2t" style="min-height:130px;" placeholder="AI suggestions here. Edit, then click Import."></textarea>
+  </div>
+  <div class="div"></div>
+  <div class="cgrid" id="cGrid"></div>
+  <button class="addcc" onclick="openCF()">+ Add ${cl.replace(/s$/,'')}</button>
+  <div class="cform" id="cForm">
+    <div class="f2">
+      <div class="f"><span class="lbl">Name</span><input id="cf-n" type="text" placeholder="${selectedType==='doc'?'e.g. DR. OKELLO':'e.g. AMARA'}"/></div>
+      <div class="f"><span class="lbl">Role</span><select id="cf-r">${castRoleOpts()}</select></div>
+    </div>
+    <div class="f"><span class="lbl">${selectedType==='doc'?'Bio & Role in Film':'Description & Arc'}</span>
+      <textarea id="cf-d" placeholder="Age, background, motivation, transformation..."></textarea>
+    </div>
+    <div class="brow"><button class="bg" id="cfSaveBtn" onclick="addChar()">Add</button><button class="bs" onclick="closeCF()">Cancel</button></div>
+  </div>
+  <div class="brow" style="margin-top:1.1rem;">
+    <button class="bs" onclick="go(0)">← ${cfg.tabs[0]}</button>
+    <button class="bg" onclick="go(2)">→ ${cfg.tabs[2]}</button>
+  </div>
+</div></div>`;}
+
+function panel2(cfg){
+  const bb=cfg.beatLabels;
+  const bbFlex=bb.length===4
+    ?`<div class="ba1" style="flex:0 0 20%">${bb[0]}</div><div class="ba2" style="flex:0 0 35%">${bb[1]}</div><div class="ba2" style="flex:0 0 25%">${bb[2]}</div><div class="ba3" style="flex:0 0 20%">${bb[3]}</div>`
+    :bb.length===2
+    ?`<div class="ba1" style="flex:0 0 40%">${bb[0]}</div><div class="ba2" style="flex:0 0 60%">${bb[1]}</div>`
+    :`<div class="ba1">${bb[0]}</div><div class="ba2">${bb[1]}</div><div class="ba3">${bb[2]}</div>`;
+  const numOpts=cfg.sceneNums.map(n=>`<option value="${n}"${n===cfg.defaultScenes?' selected':''}>${n} ${cfg.unitLabel.toLowerCase()}</option>`).join('');
+  return`<div class="panel" id="p-2"><div class="pg">
+  <div class="ttl">${cfg.tabs[2]}</div>
+  <div class="sub">Generate your ${cfg.unitLabel.toLowerCase()} or write them manually. Every entry is editable inline.</div>
+  <div style="background:var(--bg3);border:1px solid var(--br);border-radius:5px;padding:0.8rem;margin-bottom:0.9rem;">
+    <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--g);margin-bottom:0.4rem;">Story Structure</div>
+    <div class="beatbar">${bbFlex}</div>
+    <div class="blbls">${cfg.beatSubs.map(s=>`<span>${s}</span>`).join('')}</div>
+  </div>
+  <div class="f2">
+    <div class="f"><span class="lbl">Number of ${cfg.unitLabel}</span><select id="o-n">${numOpts}</select></div>
+    <div class="f"><span class="lbl">Structure</span><select id="o-s">${cfg.structures.map(s=>`<option>${s}</option>`).join('')}</select></div>
+  </div>
+  <div class="brow">
+    <button class="bg" onclick="genOutline()"><span class="spin" id="sp3" style="display:none"></span>✦ Generate ${cfg.unitLabel}</button>
+    <button class="bs" onclick="addBlankScene()">+ Add Manually</button>
+  </div>
+  <div id="ab3-wrap" style="display:none;margin-top:0.7rem;">
+    <div class="ebox-bar"><span class="ebox-lbl"><div class="edot" id="ab3dot"></div>Generating ${cfg.unitLabel.toLowerCase()}...</span></div>
+    <textarea class="ebox-ta" id="ab3t" style="min-height:50px;"></textarea>
+  </div>
+  <div id="slist" style="margin-top:0.8rem;"></div>
+  <div class="brow" style="margin-top:0.5rem;">
+    <button class="bs" onclick="go(1)">← ${cfg.tabs[1]}</button>
+    <button class="bg" onclick="go(3)">→ ${cfg.tabs[3]}</button>
+  </div>
+</div></div>`;}
+
+function panel3(cfg){return`<div class="panel script-panel" id="p-3">
+  <div class="tool">
+    <div class="ttl" style="font-size:1.05rem;">${cfg.tabs[3]}</div>
+    <div class="sub">Generate, stream, or paste. Preview or edit directly on the page.</div>
+    <div class="f"><span class="lbl">Write</span><select id="sc-m">
+      <option value="all">Full ${selectedType==='tv'||selectedType==='pilot'?'episode':'script'}</option>
+      <option value="act1">Opening section</option><option value="act2">Middle section</option><option value="act3">Final section</option>
+    </select></div>
+    <div class="f"><span class="lbl">Dialogue Style</span><select id="sc-d">
+      <option>Balanced</option><option>Heavy dialogue</option><option>Action-focused</option>
+    </select></div>
+    <div class="brow">
+      <button class="bg" id="gsbtn" onclick="genScript()"><span class="spin" id="sp4" style="display:none"></span>✦ Generate</button>
+      <button class="bs" onclick="clearSc()">Clear</button>
+    </div>
+    <div class="div"></div>
+    <span class="lbl">${cfg.unitLabel} Navigator</span>
+    <div id="snav" style="margin-top:0.35rem;max-height:150px;overflow-y:auto;"></div>
+    <div class="div"></div>
+    <span class="lbl">Stats</span>
+    <div class="statgrid">
+      <div class="stat"><div class="stat-n" id="st-pg">0</div><div class="stat-l">Pages</div></div>
+      <div class="stat"><div class="stat-n" id="st-wd">0</div><div class="stat-l">Words</div></div>
+      <div class="stat"><div class="stat-n" id="st-sc">0</div><div class="stat-l">${cfg.unitLabel}</div></div>
+      <div class="stat"><div class="stat-n" id="st-rt">0m</div><div class="stat-l">Runtime</div></div>
+    </div>
+    <div class="brow" style="margin-top:0.75rem;">
+      <button class="bs" onclick="go(2)">← ${cfg.tabs[2]}</button>
+      <button class="bg" onclick="go(4)">→ ${cfg.tabs[4]}</button>
+    </div>
+  </div>
+  <div class="preview">
+    <div class="spwrap">
+      <div class="spmeta">
+        <span id="sp-ttl">Untitled — Draft 1</span>
+        <span><b id="sp-pg">0</b> pages · <b id="sp-rt">0</b>m est.</span>
+      </div>
+      <div class="sp-toolbar">
+        <span class="badge">${cfg.name}</span>
+        <span class="badge">${selectedFmt||''}</span>
+        <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;">
+          <button class="mode-btn on" id="mbPreview" onclick="setMode('preview')">Preview</button>
+          <button class="mode-btn" id="mbEdit" onclick="setMode('edit')">✏ Edit</button>
+          <button class="mode-btn" onclick="pasteMode()">📋 Paste</button>
+          <button class="mode-btn" onclick="copyScript()">Copy</button>
+        </div>
+      </div>
+      <div id="spPreview"><div class="sppage"><div class="spnum">1.</div>
+        <div id="spContent"><div class="spempty">
+          <div class="eico">${cfg.ico}</div>
+          <div class="ettl">FADE IN:</div>
+          <div class="esub">Generate or paste your ${selectedType==='doc'?'documentary script':'screenplay'}</div>
+        </div></div>
+      </div></div>
+      <div id="spEditWrap" style="display:none;">
+        <textarea class="sp-editor" id="spEditor" placeholder="Write or paste your script here..." oninput="onEditorInput()" spellcheck="true"></textarea>
+      </div>
+      <div id="spPasteWrap" style="display:none;">
+        <textarea class="sp-editor" id="spPaste" placeholder="Paste your existing draft here..." style="background:#F0EDE5;color:#333;"></textarea>
+        <div class="brow" style="margin-top:0.5rem;">
+          <button class="bg" onclick="importPaste()">Import Draft</button>
+          <button class="bs" onclick="cancelPaste()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`;}
+
+function panel4(cfg){return`<div class="panel" id="p-4"><div class="pg">
+  <div class="ttl">${cfg.tabs[4]}</div>
+  <div class="sub">Refine with targeted AI tools. Before/After comparison — editable, accept when ready.</div>
+  <div class="pgrid">
+    <button class="pc" onclick="selPol(this,'dialogue')"><span class="pc-i">💬</span><div class="pc-n">Sharpen ${selectedType==='doc'?'Narration':'Dialogue'}</div><div class="pc-d">Distinctive, subtext-loaded</div></button>
+    <button class="pc" onclick="selPol(this,'action')"><span class="pc-i">⚡</span><div class="pc-n">Tighten Action</div><div class="pc-d">Leaner, more cinematic</div></button>
+    <button class="pc" onclick="selPol(this,'pacing')"><span class="pc-i">🎞</span><div class="pc-n">Fix Pacing</div><div class="pc-d">Balance rhythm & momentum</div></button>
+    <button class="pc" onclick="selPol(this,'tension')"><span class="pc-i">🔥</span><div class="pc-n">Raise Stakes</div><div class="pc-d">More conflict & urgency</div></button>
+    <button class="pc" onclick="selPol(this,'format')"><span class="pc-i">📋</span><div class="pc-n">Fix Formatting</div><div class="pc-d">${cfg.name} standard</div></button>
+    <button class="pc" onclick="selPol(this,'director')"><span class="pc-i">🎥</span><div class="pc-n">Director's Notes</div><div class="pc-d">Visual & camera direction</div></button>
+  </div>
+  <div class="brow">
+    <button class="bg" id="polbtn" onclick="runPol()" disabled><span class="spin" id="sp5" style="display:none"></span>✦ Polish</button>
+    <button class="bs" onclick="acceptPolish()">✓ Accept Version</button>
+    <button class="bs" onclick="copyScript()">📋 Copy</button>
+    <button class="xbtn" onclick="doExport()">↓ Export .txt</button>
+  </div>
+  <div id="polOut" style="display:none;margin-top:1.1rem;">
+    <div class="compare-grid">
+      <div class="compare-col"><h4>Original</h4><div class="sp-compare" id="polBefore"></div></div>
+      <div class="compare-col after"><h4>Polished ✦ <span class="edit-tag" style="color:var(--mu);">✏ editable</span></h4>
+        <textarea class="sp-compare" id="polAfter" style="background:#F9F7F1;border:2px solid rgba(200,144,30,0.3);resize:vertical;min-height:180px;font-family:'Courier Prime',monospace;font-size:10pt;color:#111;outline:none;"></textarea>
+      </div>
+    </div>
+  </div>
+</div></div>`;}
+
+// ══════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════
+function go(n){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  const panel=document.getElementById('p-'+n);
+  if(panel)panel.classList.add('on');
+  const tab=document.querySelector('[data-ti="'+n+'"]');
+  if(tab)tab.classList.add('on');
+  renderSceneNav();
+}
+
+// ══════════════════════════════
+//  STATE
+// ══════════════════════════════
+function v(id){return document.getElementById(id)?.value||'';}
+function syncS(){
+  S.title=v('s-title');S.logline=v('s-logline');S.setting=v('s-set');
+  S.themes=v('s-themes');S.protagonist=v('s-proto');S.conflict=v('s-conf');S.tone=v('s-tone');
+  const cfg=PT[selectedType];
+  S.extra={};
+  cfg.extraFields.forEach(f=>{S.extra[f.id]=v('ef-'+f.id);});
+  updateStats();
+}
+function updateStats(){
+  const w=S.script.split(/\s+/).filter(Boolean).length;
+  const pg=Math.max(0,Math.round(w/185));
+  const scn=(S.script.match(/^(INT\.|EXT\.|SCENE|SEGMENT\s|SHOT\s)/gm)||[]).length;
+  const se=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+  se('h-pg',pg);se('h-sc',S.scenes.length||scn);se('h-ca',S.cast.length);
+  se('st-pg',pg);se('st-wd',w>999?(w/1000).toFixed(1)+'k':w);
+  se('st-sc',S.scenes.length||scn);se('st-rt',pg+'m');
+  se('sp-pg',pg);se('sp-rt',pg);
+  se('sp-ttl',(S.title||'Untitled')+' — Draft 1');
+}
+
+// ══════════════════════════════
+//  STREAMING
+//  Routes through /api/claude proxy on server
+// ══════════════════════════════
+const API='/api/claude';
+const MDL='claude-sonnet-4-6';
+
+async function stream(sys,user,onChunk,onDone){
+  try{
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:MDL,max_tokens:2000,stream:true,system:sys,messages:[{role:'user',content:user}]})});
+    if(!res.ok){const e=await res.json();onChunk?.('Error: '+(e?.error?.message||res.status));onDone?.('');return;}
+    const reader=res.body.getReader(),dec=new TextDecoder();
+    let buf='',full='';
+    while(true){
+      const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop()??'';
+      for(const line of lines){
+        if(!line.startsWith('data: '))continue;
+        const d=line.slice(6).trim();if(d==='[DONE]'){onDone?.(full);return;}
+        try{const j=JSON.parse(d);if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){full+=j.delta.text;onChunk?.(j.delta.text,full);}}catch(e){}
+      }
+    }
+    onDone?.(full);
+  }catch(e){onChunk?.('\nError: '+e.message);onDone?.('');}
+}
+
+// ══════════════════════════════
+//  STORY
+// ══════════════════════════════
+async function devStory(){
+  syncS();
+  if(!S.logline&&!S.title){notify('Enter a title or logline first');return;}
+  show('sp1');
+  const w=document.getElementById('ab1-wrap'),t=document.getElementById('ab1t');
+  w.style.display='block';t.value='';setDot('ab1dot',true);
+  const cfg=PT[selectedType];
+  const sys=`You are a senior script consultant specializing in ${cfg.name}. Give concise, expert, actionable notes specific to this format (${cfg.pages}, ${cfg.runtime}).`;
+  const extras=Object.entries(S.extra).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n');
+  const p=`Analyze this ${cfg.name} concept (3–4 paragraphs):\nTitle: ${S.title}\nFormat: ${selectedFmt||cfg.name}\nLogline: ${S.logline}\nSetting: ${S.setting}\nThemes: ${S.themes}\nProtagonist: ${S.protagonist}\nConflict: ${S.conflict}\n${extras}\n\n1) What's compelling and cinematic 2) What needs sharpening 3) Comparable ${cfg.name}s 4) One key note to elevate this project.`;
+  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{hide('sp1');setDot('ab1dot',false);});
+}
+
+// ══════════════════════════════
+//  CAST
+// ══════════════════════════════
+async function aiCast(){
+  syncS();show('sp2');
+  const w=document.getElementById('ab2-wrap'),t=document.getElementById('ab2t');
+  w.style.display='block';t.value='';setDot('ab2dot',true);
+  const cfg=PT[selectedType];
+  const cl=selectedType==='doc'?'subjects and interviewees':selectedType==='commercial'?'talent and roles':'characters';
+  const sys=`You are a ${cfg.name} development expert. Create specific, compelling ${cl}.`;
+  const p=`Suggest 5 ${cl} for:\nType: ${cfg.name}\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\n\nFormat:\nNAME — Role — [description] — Arc: [transformation or contribution]\n\nMake each feel real, specific, and right for this format.`;
+  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{hide('sp2');setDot('ab2dot',false);});
+}
+
+function parseSuggAndAdd(){
+  const txt=document.getElementById('ab2t')?.value||'';
+  const lines=txt.split('\n').filter(l=>l.includes('—'));
+  let added=0;
+  lines.forEach(l=>{
+    const parts=l.split('—');if(parts.length<2)return;
+    const name=parts[0].replace(/^\d+\.\s*/,'').trim().toUpperCase();
+    if(!name||name.length>35)return;
+    const roleMatch=parts[1]?.match(/(Protagonist|Antagonist|Supporting|Mentor|Love Interest|Anti-Hero|Subject|Expert|Narrator|Lead|Ambassador)/i);
+    const role=roleMatch?roleMatch[0]:'Supporting';
+    const desc=parts.slice(2).join('—').trim();
+    if(!S.cast.find(c=>c.name===name)){S.cast.push({name,role,desc});added++;}
+  });
+  renderCast();updateStats();
+  notify(added>0?`${added} imported!`:'No entries found. Edit suggestions then retry.');
+}
+
+function openCF(idx=-1){
+  editingCharIdx=idx;
+  const form=document.getElementById('cForm');form.style.display='block';
+  if(idx>=0){
+    const c=S.cast[idx];
+    document.getElementById('cf-n').value=c.name;
+    document.getElementById('cf-r').value=c.role;
+    document.getElementById('cf-d').value=c.desc;
+    document.getElementById('cfSaveBtn').textContent='Save Changes';
+  } else {
+    document.getElementById('cf-n').value='';
+    document.getElementById('cf-d').value='';
+    document.getElementById('cfSaveBtn').textContent='Add';
+  }
+}
+function closeCF(){document.getElementById('cForm').style.display='none';editingCharIdx=-1;}
+function addChar(){
+  const n=(document.getElementById('cf-n')?.value||'').trim().toUpperCase();
+  const r=document.getElementById('cf-r')?.value||'Supporting';
+  const d=document.getElementById('cf-d')?.value.trim()||'';
+  if(!n)return;
+  if(editingCharIdx>=0)S.cast[editingCharIdx]={name:n,role:r,desc:d};
+  else S.cast.push({name:n,role:r,desc:d});
+  renderCast();updateStats();
+  document.getElementById('cf-n').value='';document.getElementById('cf-d').value='';closeCF();
+}
+function remChar(i){if(confirm('Remove?')){S.cast.splice(i,1);renderCast();updateStats();}}
+function renderCast(){
+  const g=document.getElementById('cGrid');if(!g)return;
+  g.innerHTML=S.cast.map((c,i)=>`
+    <div class="cc">
+      <button class="ccedit" onclick="openCF(${i})">✏</button>
+      <button class="ccdel" onclick="remChar(${i})">✕</button>
+      <div class="ccn">${c.name}</div><div class="ccr">${c.role}</div>
+      <div class="ccd">${c.desc||'No description.'}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════
+//  OUTLINE
+// ══════════════════════════════
+async function genOutline(){
+  syncS();
+  const n=document.getElementById('o-n')?.value||10;
+  const s=document.getElementById('o-s')?.value||'3-Act';
+  const cfg=PT[selectedType];
+  const cs=S.cast.map(c=>`${c.name} (${c.role})`).join(', ')||'main characters';
+  show('sp3');
+  const w=document.getElementById('ab3-wrap'),t=document.getElementById('ab3t');
+  w.style.display='block';t.value='';setDot('ab3dot',true);
+  document.getElementById('slist').innerHTML='';
+  const extras=Object.entries(S.extra).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n');
+  const sys=`You are a professional ${cfg.name} story structure expert. Create dramatically precise ${cfg.unitLabel.toLowerCase()} breakdowns.`;
+  const p=`Create a ${n}-${cfg.unitSingular.toLowerCase()} outline using ${s} for this ${cfg.name}:\nTitle: ${S.title}\nLogline: ${S.logline}\nSetting: ${S.setting}\nCast: ${cs}\n${extras}\n\nFormat (numbered list only, no intro text):\n1. [HEADING/LOCATION] — What specifically happens (1-2 sentences).\n...continue to ${n}.`;
+  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{
+    hide('sp3');setDot('ab3dot',false);
+    document.getElementById('ab3-wrap').style.display='none';
+    parseScenes(full);updateStats();renderSceneNav();
+  });
+}
+function parseScenes(txt){
+  const lines=txt.split('\n').filter(l=>/^\d+\./.test(l.trim()));
+  S.scenes=lines.map((l,i)=>{
+    const wo=l.replace(/^\d+\.\s*/,'').trim();
+    const di=wo.indexOf('—');
+    let loc=wo,desc='';
+    if(di>-1){loc=wo.slice(0,di).trim();desc=wo.slice(di+1).trim();}
+    return{num:i+1,loc,desc};
+  });
+  renderSceneList();
+}
+function renderSceneList(){
+  const cfg=PT[selectedType];
+  const n=S.scenes.length;
+  const a1=Math.floor(n*0.25),a2=Math.floor(n*0.75);
+  const bb=cfg.beatLabels;
+  document.getElementById('slist').innerHTML=S.scenes.map((sc,i)=>{
+    let albl='';
+    if(i===0)albl=`<div><span class="actlbl">${bb[0]}</span></div>`;
+    else if(i===a1)albl=`<div><span class="actlbl">${bb.length>2?bb[Math.floor(bb.length/2)]:bb[1]}</span></div>`;
+    else if(i===a2&&bb.length>2)albl=`<div><span class="actlbl">${bb[bb.length-1]}</span></div>`;
+    return`${albl}
+    <div class="si">
+      <div class="sih">
+        <span class="sin">${sc.num}</span>
+        <div class="si-body">
+          <div class="si-loc" contenteditable="true" spellcheck="false" onblur="saveScene(${i},'loc',this.textContent)">${esc(sc.loc)}</div>
+          <div class="si-desc" contenteditable="true" onblur="saveScene(${i},'desc',this.textContent)">${esc(sc.desc)}</div>
+          <div class="si-tools">
+            <button class="siact" onclick="wScene(${i});go(3)">✦ Write</button>
+            <button class="siact" onclick="appendScene(${i})">+ Append</button>
+            <button class="siact danger" onclick="deleteScene(${i})">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+function saveScene(i,f,val){if(S.scenes[i])S.scenes[i][f]=val.trim();}
+function deleteScene(i){S.scenes.splice(i,1);S.scenes.forEach((s,j)=>s.num=j+1);renderSceneList();renderSceneNav();updateStats();}
+function addBlankScene(){
+  const cfg=PT[selectedType];
+  S.scenes.push({num:S.scenes.length+1,loc:cfg.unitSingular.toUpperCase()+' '+(S.scenes.length+1)+' — LOCATION',desc:'Describe what happens here...'});
+  renderSceneList();renderSceneNav();updateStats();
+}
+function renderSceneNav(){
+  const nav=document.getElementById('snav');if(!nav)return;
+  if(!S.scenes.length){nav.innerHTML='<div style="font-size:10px;color:var(--mu);">No outline yet.</div>';return;}
+  nav.innerHTML=S.scenes.map((sc,i)=>`
+    <div class="snav-item" onclick="appendScene(${i})">
+      <span class="snav-n">${sc.num}</span>
+      <span class="snav-t">${sc.loc.replace(/^(INT\.|EXT\.)\s*/,'').substring(0,25)}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════
+//  SCRIPT
+// ══════════════════════════════
+function setMode(m){
+  viewMode=m;
+  document.getElementById('mbPreview')?.classList.toggle('on',m==='preview');
+  document.getElementById('mbEdit')?.classList.toggle('on',m==='edit');
+  document.getElementById('spPreview').style.display=m==='preview'?'block':'none';
+  document.getElementById('spEditWrap').style.display=m==='edit'?'block':'none';
+  document.getElementById('spPasteWrap').style.display='none';
+  if(m==='edit'){document.getElementById('spEditor').value=S.script;document.getElementById('spEditor')?.focus();}
+  if(m==='preview')renderSP();
+}
+function pasteMode(){
+  document.getElementById('spPreview').style.display='none';
+  document.getElementById('spEditWrap').style.display='none';
+  document.getElementById('spPasteWrap').style.display='block';
+}
+function importPaste(){
+  const txt=document.getElementById('spPaste')?.value.trim();
+  if(!txt){notify('Nothing to import.');return;}
+  S.script=txt;document.getElementById('spPaste').value='';
+  setMode('preview');updateStats();notify('Draft imported!');
+}
+function cancelPaste(){document.getElementById('spPaste').value='';setMode('preview');}
+function onEditorInput(){S.script=document.getElementById('spEditor')?.value||'';updateStats();}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function parseSP(txt){
+  if(!txt?.trim())return'';
+  const lines=txt.split('\n');let html='',inDial=false,prev='';
+  for(const t of lines){
+    const tr=t.trim();
+    if(!tr){html+='<div class="spbl"></div>';if(prev==='action')inDial=false;continue;}
+    if(/^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO:|SMASH CUT TO:|DISSOLVE TO:|THE END|IRIS IN:|IRIS OUT\.|ACT ONE|ACT TWO|ACT THREE|END OF ACT|TAG:|COLD OPEN:)$/.test(tr)){html+=`<div class="sptr">${esc(tr)}</div>`;inDial=false;prev='trans';continue;}
+    if(/^(INT\.|EXT\.|I\/E\.|B-ROLL:|SCENE\s\d|SEGMENT\s\d|SHOT\s\d|SOUND:|MUSIC:|VISUAL:|SETTING:)/.test(tr)){html+=`<div class="spsh">${esc(tr)}</div>`;inDial=false;prev='sh';continue;}
+    if(tr.startsWith('(')&&tr.endsWith(')')&&inDial){html+=`<div class="sppa">${esc(tr)}</div>`;prev='paren';continue;}
+    if(/^[A-Z][A-Z\s'\-()\.V]+$/.test(tr)&&tr.length<45&&!tr.endsWith('TO:')&&!tr.startsWith('INT')&&!tr.startsWith('EXT')&&!tr.startsWith('B-')&&tr.split(' ').length<=6){html+=`<div class="spch">${esc(tr)}</div>`;inDial=true;prev='char';continue;}
+    if(inDial&&prev!=='sh'&&prev!=='action'){html+=`<div class="spdi">${esc(tr)}</div>`;prev='dial';continue;}
+    html+=`<div class="spac">${esc(tr)}</div>`;inDial=false;prev='action';
+  }
+  return html;
+}
+function renderSP(){
+  const el=document.getElementById('spContent');if(!el)return;
+  const html=parseSP(S.script);
+  el.innerHTML=html||`<div class="spempty"><div class="eico">${PT[selectedType]?.ico||'🎬'}</div><div class="ettl">FADE IN:</div><div class="esub">Generate or paste your script</div></div>`;
+}
+
+async function genScript(){
+  syncS();if(isGen)return;isGen=true;
+  show('sp4');document.getElementById('gsbtn').disabled=true;setMode('preview');
+  const cfg=PT[selectedType];
+  const cs=S.cast.map(c=>`${c.name} (${c.role}): ${c.desc}`).join('\n')||'As per story';
+  const ss=S.scenes.length?S.scenes.map(s=>`${s.num}. ${s.loc} — ${s.desc}`).join('\n'):'Generate from logline';
+  const extras=Object.entries(S.extra).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n');
+  const p=`Write a professional ${cfg.name} script:\nTITLE: ${S.title||'Untitled'}\nFORMAT: ${selectedFmt||cfg.name}\nLOGLINE: ${S.logline}\nSETTING: ${S.setting}\nTHEMES: ${S.themes}\nTONE: ${S.tone}\n${extras}\n\nCAST:\n${cs}\n\nOUTLINE:\n${ss}\n\nWrite in professional ${cfg.name} format. Begin with FADE IN:.`;
+  const spc=document.getElementById('spContent');
+  spc.innerHTML='';const cur=document.createElement('span');cur.className='gen-cursor';
+  await stream(cfg.scriptSys,p,(c,full)=>{
+    S.script=full;spc.innerHTML=parseSP(full);spc.appendChild(cur);
+    document.querySelector('.preview')?.scrollTo(0,999999);
+  },(full)=>{
+    S.script=full;renderSP();hide('sp4');
+    document.getElementById('gsbtn').disabled=false;isGen=false;
+    updateStats();renderSceneNav();
+    notify('Generated! ~'+Math.round(full.split(/\s+/).length/185)+' pages');
+  });
+}
+
+async function wScene(idx){
+  syncS();const sc=S.scenes[idx];if(!sc)return;
+  if(isGen)return;isGen=true;go(3);setMode('preview');
+  show('sp4');document.getElementById('gsbtn').disabled=true;
+  const cfg=PT[selectedType];
+  const cs=S.cast.map(c=>`${c.name} (${c.role}): ${c.desc}`).join('\n')||'';
+  const sys=`You are a professional ${cfg.name} writer. Write ONE complete scene/segment in proper format. Start directly with the heading.`;
+  const p=`Write this single ${cfg.unitSingular.toLowerCase()}:\n${sc.loc} — ${sc.desc}\nTitle: ${S.title}\nCast: ${cs}\nTone: ${S.tone||'cinematic'}\nStart with the heading. Write complete content. End with a transition.`;
+  const existing=S.script?S.script+'\n\n':'';
+  const spc=document.getElementById('spContent');
+  const cur=document.createElement('span');cur.className='gen-cursor';
+  await stream(cfg.scriptSys,p,(c,full)=>{
+    spc.innerHTML=parseSP(existing+full);spc.appendChild(cur);
+    document.querySelector('.preview')?.scrollTo(0,999999);
+  },(full)=>{
+    S.script=existing+full;renderSP();hide('sp4');
+    document.getElementById('gsbtn').disabled=false;isGen=false;
+    updateStats();renderSceneNav();notify(cfg.unitSingular+' '+sc.num+' written!');
+  });
+}
+async function appendScene(idx){await wScene(idx);}
+function clearSc(){
+  if(S.script&&!confirm('Clear the entire script?'))return;
+  S.script='';renderSP();const e=document.getElementById('spEditor');if(e)e.value='';
+  updateStats();renderSceneNav();
+}
+
+// ══════════════════════════════
+//  POLISH
+// ══════════════════════════════
+function selPol(btn,t){
+  document.querySelectorAll('.pc').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');polType=t;
+  document.getElementById('polbtn').disabled=false;
+}
+async function runPol(){
+  if(!polType)return;syncS();
+  show('sp5');document.getElementById('polbtn').disabled=true;
+  const po=document.getElementById('polOut'),ba=document.getElementById('polBefore'),af=document.getElementById('polAfter');
+  po.style.display='block';
+  const sample=(S.script||'No script yet.').substring(0,2500);
+  ba.textContent=sample;af.value='';
+  const inst={
+    dialogue:'Rewrite all dialogue to be more distinctive, character-specific, and subtext-rich.',
+    action:'Tighten all action lines: leaner, present tense, short sentences, no adverbs.',
+    pacing:'Improve pacing: cut unnecessary beats, add urgency, sharpen transitions.',
+    tension:'Raise dramatic stakes: more conflict, heighten subtext, increase urgency.',
+    format:`Correct ALL formatting to professional ${PT[selectedType]?.name} standard.`,
+    director:'Add [DIRECTOR\'S NOTE: visual, camera, lighting, emotional beat] after key scenes.'
+  };
+  const sys=`You are a senior script doctor. Apply the requested polish with surgical precision while maintaining the unique voice of the material.`;
+  await stream(sys,`${inst[polType]}\n\nSCRIPT:\n${sample}`,(c,full)=>{af.value=full;},(full)=>{
+    hide('sp5');document.getElementById('polbtn').disabled=false;
+  });
+}
+function acceptPolish(){
+  const af=document.getElementById('polAfter');
+  const polished=af?.value;
+  if(!polished){notify('Run a polish tool first.');return;}
+  if(confirm('Replace your current script with the polished version?')){
+    S.script=polished;renderSP();updateStats();
+    const e=document.getElementById('spEditor');if(e)e.value=polished;
+    notify('Accepted!');go(3);
+  }
+}
+
+// ══════════════════════════════
+//  EXPORT
+// ══════════════════════════════
+function copyScript(){navigator.clipboard.writeText(S.script||'No script yet.').then(()=>notify('Copied!'));}
+function doExport(){
+  if(!S.script){notify('Generate a script first!');return;}
+  const blob=new Blob([S.script],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=((S.title||'script').replace(/\s+/g,'-').toLowerCase())+'.txt';
+  a.click();notify('Exported!');
+}
+
+// ══════════════════════════════
+//  UTILS
+// ══════════════════════════════
+function show(id){const e=document.getElementById(id);if(e)e.style.display='inline-block';}
+function hide(id){const e=document.getElementById(id);if(e)e.style.display='none';}
+function notify(msg){const n=document.getElementById('notif');if(!n)return;n.textContent=msg;n.classList.add('on');setTimeout(()=>n.classList.remove('on'),2800);}
+function setDot(id,anim){const d=document.getElementById(id);if(d)d.classList.toggle('anim',anim);}
+</script>
 </body>
 </html>
