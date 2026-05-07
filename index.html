@@ -786,27 +786,68 @@ function updateStats(){
 //  Routes through /api/claude proxy on server
 // ══════════════════════════════
 const API='/api/claude';
-const MDL='claude-sonnet-4-20250514';
+const MDL='claude-sonnet-4-5';
+
+function _scExtractErr(e,fallback){
+  if(!e) return 'Error '+fallback;
+  if(typeof e.error==='string') return e.error;
+  if(e.error&&typeof e.error.message==='string') return e.error.message;
+  if(typeof e.message==='string') return e.message;
+  return 'Error '+fallback;
+}
 
 async function stream(sys,user,onChunk,onDone){
+  let res;
   try{
-    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:MDL,max_tokens:2000,stream:true,system:sys,messages:[{role:'user',content:user}]})});
-    if(!res.ok){const e=await res.json();onChunk?.('Error: '+(e?.error?.message||res.status));onDone?.('');return;}
-    const reader=res.body.getReader(),dec=new TextDecoder();
-    let buf='',full='';
+    res=await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'text/event-stream'},
+      body:JSON.stringify({model:MDL,max_tokens:2000,stream:true,system:sys,messages:[{role:'user',content:user}]})
+    });
+  }catch(e){
+    onChunk?.('Network error: '+(e?.message||e)); onDone?.(''); return;
+  }
+  if(!res.ok){
+    let msg='Error '+res.status;
+    try{const j=await res.json(); msg=_scExtractErr(j,res.status);}catch{ try{msg=await res.text()||msg;}catch{} }
+    onChunk?.('AI request failed — '+msg); onDone?.(''); return;
+  }
+  const ct=res.headers.get('content-type')||'';
+  if(ct.includes('application/json')){
+    try{const j=await res.json(); onChunk?.('AI request failed — '+_scExtractErr(j,res.status));}catch{}
+    onDone?.(''); return;
+  }
+  if(!res.body){onChunk?.('AI request failed — empty response.');onDone?.('');return;}
+  const reader=res.body.getReader(),dec=new TextDecoder();
+  let buf='',full='';
+  try{
     while(true){
       const{done,value}=await reader.read();if(done)break;
       buf+=dec.decode(value,{stream:true});
       const lines=buf.split('\n');buf=lines.pop()??'';
       for(const line of lines){
-        if(!line.startsWith('data: '))continue;
-        const d=line.slice(6).trim();if(d==='[DONE]'){onDone?.(full);return;}
-        try{const j=JSON.parse(d);if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){full+=j.delta.text;onChunk?.(j.delta.text,full);}}catch(e){}
+        const trimmed=line.trim();
+        if(!trimmed||trimmed.startsWith('event:')) continue;
+        if(!trimmed.startsWith('data:')) continue;
+        const d=trimmed.slice(5).trim();
+        if(!d) continue;
+        if(d==='[DONE]'){onDone?.(full);return;}
+        let j; try{j=JSON.parse(d);}catch{continue;}
+        if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){
+          full+=j.delta.text; onChunk?.(j.delta.text,full);
+        } else if(j.type==='message_stop'){
+          onDone?.(full); return;
+        } else if(j.type==='error'){
+          onChunk?.('\nAI error — '+(j.error?.message||'unknown'));
+          onDone?.(full); return;
+        }
       }
     }
     onDone?.(full);
-  }catch(e){onChunk?.('\nError: '+e.message);onDone?.('');}
+  }catch(e){
+    onChunk?.('\nStream interrupted: '+(e?.message||e));
+    onDone?.(full);
+  }
 }
 
 // ══════════════════════════════
