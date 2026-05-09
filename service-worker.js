@@ -1,14 +1,17 @@
 // SceneCraft Studio — service worker.
-// Caches the static app shell so the editor loads offline. AI calls (POST /api/chat)
-// always go to the network; auth (Firebase) is also network-only.
+// Caches the static app shell so the editor loads offline. AI calls (POST /api/claude)
+// always go to the network; Firebase auth/Firestore are also network-only (gstatic.com origin).
 
-const VERSION = 'sc-shell-v1';
+const VERSION = 'sc-shell-v2';
+
+// Files we precache for offline boot. firebase-config.js is intentionally excluded:
+// it changes whenever the Firebase project values are updated, and a stale copy
+// makes the app think Firebase is unconfigured.
 const SHELL = [
   '/',
   '/index.html',
   '/style.css',
   '/app.js',
-  '/firebase-config.js',
   '/firebase-init.js',
   '/favicon.svg',
   '/og-image.svg',
@@ -39,17 +42,15 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.startsWith('/api/')) return;
   if (url.origin !== self.location.origin) return;
 
-  // Stale-while-revalidate for the app shell.
+  // Network-first: always prefer fresh content; fall back to cache only when offline.
+  // This avoids serving stale index.html or firebase-config.js after an update.
   event.respondWith(
-    caches.match(req).then((cached) => {
-      const network = fetch(req).then((res) => {
-        if (res && res.ok && res.type === 'basic') {
-          const copy = res.clone();
-          caches.open(VERSION).then((c) => c.put(req, copy));
-        }
-        return res;
-      }).catch(() => cached);
-      return cached || network;
-    })
+    fetch(req).then((res) => {
+      if (res && res.ok && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => {});
+      }
+      return res;
+    }).catch(() => caches.match(req))
   );
 });
