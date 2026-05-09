@@ -221,6 +221,70 @@ select option{background:var(--bg2);}
   .hd-stat{display:none;}
   .sppage,.sp-editor{padding:24px 18px 24px 22px;}
 }
+
+/* ── AUTH UI ── */
+.auth-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--su);padding:4px 10px 4px 5px;border-radius:20px;cursor:pointer;font-size:11.5px;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap;}
+.auth-pill:hover{border-color:var(--brg);color:var(--g);}
+.auth-pill.signed-in{background:rgba(200,144,30,0.06);border-color:var(--brg);color:var(--g);}
+.auth-av{width:22px;height:22px;border-radius:50%;background:rgba(200,144,30,0.18);color:var(--g);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background-size:cover;background-position:center;}
+.auth-pill.signed-in .auth-av{background:var(--g);color:#000;}
+.auth-label{max-width:120px;overflow:hidden;text-overflow:ellipsis;}
+
+.auth-pill-sel{position:absolute;top:1.2rem;right:1.5rem;}
+
+.user-menu{position:fixed;background:var(--bg2);border:1px solid var(--brg);border-radius:6px;box-shadow:0 12px 40px rgba(0,0,0,0.6);min-width:220px;z-index:9999;padding:6px;font-family:'DM Sans',sans-serif;}
+.user-menu-head{padding:10px 12px 8px;border-bottom:1px solid var(--br);margin-bottom:4px;}
+.user-menu-head>div:first-child{font-size:13px;font-weight:600;color:var(--tx);}
+.um-email{font-size:11px;color:var(--mu);margin-top:2px;}
+.user-menu-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--su);padding:7px 12px;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.user-menu-item:hover{background:rgba(200,144,30,0.08);color:var(--g);}
+.user-menu-item.danger{color:#D88;}
+.user-menu-item.danger:hover{background:rgba(220,80,80,0.08);color:#E66;}
+
+.auth-overlay{position:fixed;inset:0;background:rgba(5,5,15,0.78);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:10000;padding:1rem;}
+.auth-overlay.on{display:flex;}
+.auth-card{background:var(--bg2);border:1px solid var(--brg);border-radius:10px;padding:1.8rem 1.6rem;max-width:380px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.7);}
+.auth-h{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--tx);margin-bottom:0.3rem;}
+.auth-h em{color:var(--g);font-style:italic;font-weight:300;}
+.auth-sub{font-size:12px;color:var(--mu);margin-bottom:1.3rem;line-height:1.5;}
+.auth-google{width:100%;background:#fff;color:#111;border:none;border-radius:5px;padding:0.7rem 1rem;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'DM Sans',sans-serif;transition:transform 0.15s;}
+.auth-google:hover{transform:translateY(-1px);}
+.auth-google:disabled{opacity:0.6;cursor:wait;}
+.auth-google svg{width:18px;height:18px;}
+.auth-foot{font-size:10.5px;color:var(--mu);margin-top:1rem;line-height:1.5;text-align:center;}
+.auth-x{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;line-height:1;}
+.auth-x:hover{color:var(--g);}
+.auth-card{position:relative;}
+.auth-err{background:rgba(220,80,80,0.08);border:1px solid rgba(220,80,80,0.25);color:#E89;padding:0.5rem 0.75rem;border-radius:4px;font-size:11.5px;margin-bottom:0.8rem;}
+.auth-err[hidden]{display:none;}
+
+.hd-quota{font-size:10.5px;color:var(--mu);padding:3px 9px;border:1px solid var(--br);border-radius:14px;cursor:default;}
+.hd-quota.warn{color:#E89;border-color:rgba(220,80,80,0.3);}
+.hd-quota[hidden]{display:none;}
+
+/* ── DRAFTS / PROJECTS ── */
+.drafts-btn{background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--su);padding:5px 11px;border-radius:18px;font-size:11.5px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all 0.2s;}
+.drafts-btn:hover{border-color:var(--brg);color:var(--g);}
+.drafts-btn .dcount{font-size:10px;background:rgba(200,144,30,0.12);color:var(--g);border:1px solid var(--brg);padding:0 5px;border-radius:9px;min-width:16px;height:14px;display:inline-flex;align-items:center;justify-content:center;}
+.drafts-btn .dcount[hidden]{display:none;}
+.drafts-btn-sel{position:absolute;top:1.2rem;right:7.5rem;}
+
+.drafts-list{max-height:50vh;overflow-y:auto;margin-top:0.4rem;}
+.draft-row{display:flex;align-items:center;gap:0.7rem;padding:0.7rem 0.8rem;border:1px solid var(--br);border-radius:5px;margin-bottom:0.4rem;cursor:pointer;transition:all 0.18s;background:rgba(255,255,255,0.02);}
+.draft-row:hover{border-color:var(--brg);background:rgba(200,144,30,0.05);}
+.draft-row.current{border-color:var(--g);background:rgba(200,144,30,0.07);}
+.draft-ico{font-size:1.35rem;flex-shrink:0;}
+.draft-meta{flex:1;min-width:0;}
+.draft-title{font-size:13.5px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.draft-sub{font-size:10.5px;color:var(--mu);margin-top:2px;}
+.draft-current-badge{font-size:8.5px;background:var(--g);color:#000;padding:1px 6px;border-radius:9px;font-weight:700;letter-spacing:0.04em;margin-left:6px;vertical-align:middle;}
+.draft-actions{display:flex;gap:2px;flex-shrink:0;}
+.draft-actions button{background:none;border:none;color:var(--mu);cursor:pointer;padding:4px 7px;font-size:12px;border-radius:3px;font-family:'DM Sans',sans-serif;}
+.draft-actions button:hover{color:var(--g);background:rgba(200,144,30,0.08);}
+.draft-actions button.danger:hover{color:#E88;background:rgba(220,80,80,0.08);}
+.drafts-new{width:100%;background:var(--g);color:#000;border:none;padding:0.6rem 1rem;border-radius:5px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:0.7rem;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.2s;}
+.drafts-new:hover{background:var(--gl);}
+.drafts-empty{text-align:center;padding:1.5rem 1rem;color:var(--mu);font-size:11.5px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -229,6 +293,13 @@ select option{background:var(--bg2);}
      PROJECT SELECT
 ══════════════════════════════ -->
 <div class="screen on" id="scr-select">
+<button class="drafts-btn drafts-btn-sel" id="draftsBtnSel" onclick="openDrafts()" type="button" hidden>
+  📁 Drafts <span class="dcount" id="draftsCountSel" hidden>0</span>
+</button>
+<button class="auth-pill auth-pill-sel" id="userPillSel" onclick="onUserPillClick()" type="button">
+  <div class="auth-av" id="userAvatarSel">?</div>
+  <span class="auth-label" id="userLabelSel">Sign in</span>
+</button>
 <div class="sel-inner">
   <div class="sel-eyebrow">SceneCraft Studio</div>
   <h1 class="sel-h1">What are you <em>creating?</em></h1>
@@ -319,6 +390,14 @@ select option{background:var(--bg2);}
     <nav class="tabs" id="tabNav"></nav>
     <div class="hd-r">
       <div class="hd-stat" id="hdStat"></div>
+      <span class="hd-quota" id="hdQuota" hidden></span>
+      <button class="drafts-btn" id="draftsBtn" onclick="openDrafts()" type="button" hidden>
+        📁 Drafts <span class="dcount" id="draftsCount" hidden>0</span>
+      </button>
+      <button class="auth-pill" id="userPill" onclick="onUserPillClick()" type="button">
+        <div class="auth-av" id="userAvatar">?</div>
+        <span class="auth-label" id="userLabel">Sign in</span>
+      </button>
       <button class="xbtn" onclick="doExport()">↓ Export</button>
     </div>
   </div>
@@ -326,6 +405,46 @@ select option{background:var(--bg2);}
   <div id="panelsContainer"></div>
   <div class="footer">SceneCraft Studio &mdash; Powered by <a href="https://anthropic.com" target="_blank">Claude AI</a> &mdash; <span style="cursor:pointer;color:var(--g);" onclick="goSelect()">Change Project Type</span></div>
 </div>
+
+<!-- ══════════════════════════════
+     AUTH MODAL
+══════════════════════════════ -->
+<div class="auth-overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authH">
+  <div class="auth-card">
+    <button class="auth-x" type="button" onclick="closeAuth()" aria-label="Close">✕</button>
+    <div class="auth-h">Sign in to <em>SceneCraft</em></div>
+    <div class="auth-sub" id="authSub">Sign in to use AI generation. Your drafts and usage stay tied to your account.</div>
+    <div class="auth-err" id="authErr" hidden></div>
+    <button class="auth-google" id="authGoogle" type="button" onclick="doGoogleSignIn()">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.6 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.5-5.2l-6.2-5.2c-2 1.4-4.6 2.4-7.3 2.4-5.3 0-9.7-3.4-11.3-8l-6.5 5C9.6 39.6 16.2 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.4 4.3-4.4 5.6l6.2 5.2C40.7 35.9 44 30.5 44 24c0-1.3-.1-2.3-.4-3.5z"/>
+      </svg>
+      Continue with Google
+    </button>
+    <div class="auth-foot">By continuing, you agree to our terms. We use Firebase for sign-in. We don't share your email.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DRAFTS MODAL
+══════════════════════════════ -->
+<div class="auth-overlay" id="draftsOverlay" role="dialog" aria-modal="true" aria-labelledby="draftsH">
+  <div class="auth-card" style="max-width:560px;padding:1.4rem 1.5rem;">
+    <button class="auth-x" type="button" onclick="closeDrafts()" aria-label="Close">✕</button>
+    <div class="auth-h" id="draftsH">Your <em>Projects</em></div>
+    <div class="auth-sub">All your screenplays, treatments and outlines. Pick up any project where you left off.</div>
+    <button class="drafts-new" type="button" onclick="startNewProject()">+ New Project</button>
+    <div class="drafts-list" id="draftsList"></div>
+    <div class="drafts-empty" id="draftsEmpty" hidden>No saved projects yet. Click "New Project" above to start one.</div>
+  </div>
+</div>
+
+<!-- Firebase config + init (module). Loaded before the inline app script. -->
+<script src="firebase-config.js"></script>
+<script type="module" src="firebase-init.js"></script>
 
 <script>
 // ══════════════════════════════
@@ -338,7 +457,7 @@ const PT = {
     unitLabel:'Scenes',unitSingular:'Scene',sceneNums:[10,15,20,25],defaultScenes:15,
     pages:'90–120 pages',runtime:'90–120 min',
     loglineHint:'A [flawed protagonist] must [impossible goal] before [devastating consequence].',
-    extraFields:[{id:'budget',label:'Budget Range',type:'select',opts:['Micro (<$50k)','Low ($50k–$1M)','Mid ($1M–$10M)','High ($10M+)']}],
+    extraFields:[],
     beatLabels:['ACT I','ACT II','ACT III'],beatSubs:['Setup 25%','Confrontation 50%','Resolution 25%'],
     scriptSys:`You are an award-winning Hollywood screenwriter. Write in strict professional screenplay format: FADE IN:, INT./EXT. scene headings ALL CAPS, action lines present tense, character names ALL CAPS centered before dialogue, proper parentheticals, CUT TO: transitions. Make it cinematic and emotionally compelling.`
   },
@@ -348,7 +467,7 @@ const PT = {
     unitLabel:'Scenes',unitSingular:'Scene',sceneNums:[3,5,7,10],defaultScenes:5,
     pages:'5–40 pages',runtime:'5–40 min',
     loglineHint:'A [character] encounters [situation] that leads to [outcome or revelation].',
-    extraFields:[{id:'fest',label:'Target Festival',type:'select',opts:['Sundance','TIFF','Cannes','Tribeca','Pan-African Film Festival','Local Festival']}],
+    extraFields:[],
     beatLabels:['SETUP','CONFLICT','RESOLUTION'],beatSubs:['Setup 30%','Conflict 40%','Resolution 30%'],
     scriptSys:`You are a short film specialist screenwriter. Write concise, impactful screenplay in professional format. Every line must earn its place. FADE IN:, proper slug lines, action, character names ALL CAPS before dialogue.`
   },
@@ -458,8 +577,10 @@ const PT = {
 //  STATE
 // ══════════════════════════════
 let selectedType=null,selectedFmt=null;
-let S={title:'',logline:'',setting:'',themes:'',protagonist:'',conflict:'',tone:'',extra:{},cast:[],scenes:[],script:''};
+let S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
 let isGen=false,viewMode='preview',polType=null,editingCharIdx=-1;
+// ── Resume / persistence state ──
+let currentDraftId=null,currentTab=0,saveTimer=null,didResume=false,suppressSave=false;
 
 // ══════════════════════════════
 //  PROJECT SELECT
@@ -489,11 +610,17 @@ function startApp(){
   buildApp();
   document.getElementById('scr-select').classList.remove('on');
   document.getElementById('scr-app').classList.add('on');
+  // A user clicking through select → "Start Writing" is starting fresh.
+  // Save kicks off draft creation if signed in (stays local otherwise).
+  scheduleSave();
 }
 
 function goSelect(){
   document.getElementById('scr-app').classList.remove('on');
   document.getElementById('scr-select').classList.add('on');
+  // Picking a different project type creates a new active draft on next save,
+  // so reset the draft pointer; the prior draft remains in the user's drafts list.
+  currentDraftId=null;
 }
 
 // ══════════════════════════════
@@ -543,12 +670,39 @@ function panel0(cfg){return`<div class="panel on" id="p-0"><div class="pg">
   </div>
   <div class="f"><span class="lbl">Logline / Premise</span><textarea id="s-logline" oninput="syncS()" style="min-height:58px;" placeholder="${cfg.loglineHint}"></textarea></div>
   <div class="f2">
-    <div class="f"><span class="lbl">World & Setting</span><input id="s-set" type="text" oninput="syncS()" placeholder="Time, place, world..."/></div>
-    <div class="f"><span class="lbl">Themes</span><input id="s-themes" type="text" oninput="syncS()" placeholder="e.g. identity, betrayal..."/></div>
-  </div>
-  <div class="f2">
-    <div class="f"><span class="lbl">Protagonist</span><input id="s-proto" type="text" oninput="syncS()" placeholder="Who is your hero?"/></div>
-    <div class="f"><span class="lbl">Central Conflict</span><input id="s-conf" type="text" oninput="syncS()" placeholder="Core struggle?"/></div>
+    <div class="f"><span class="lbl">World & Setting</span><select id="s-set" onchange="syncS()">
+      <option value="">Select...</option>
+      <option>Modern Day — Urban</option>
+      <option>Modern Day — Rural / Small Town</option>
+      <option>Period / Historical</option>
+      <option>Near Future / Sci-Fi</option>
+      <option>Far Future / Space</option>
+      <option>Fantasy / Mythical</option>
+      <option>Post-Apocalyptic</option>
+      <option>War-Torn</option>
+      <option>Workplace / Office</option>
+      <option>Wilderness / Nature</option>
+      <option>Suburban Family</option>
+      <option>Coastal / Island</option>
+      <option>Underworld / Crime</option>
+    </select></div>
+    <div class="f"><span class="lbl">Themes</span><select id="s-themes" onchange="syncS()">
+      <option value="">Select...</option>
+      <option>Identity & Self-Discovery</option>
+      <option>Love & Relationships</option>
+      <option>Power & Corruption</option>
+      <option>Family & Legacy</option>
+      <option>Justice & Revenge</option>
+      <option>Survival & Resilience</option>
+      <option>Coming of Age</option>
+      <option>Betrayal & Trust</option>
+      <option>Redemption</option>
+      <option>Class & Inequality</option>
+      <option>Faith & Doubt</option>
+      <option>Freedom vs. Control</option>
+      <option>Grief & Healing</option>
+      <option>Ambition & Sacrifice</option>
+    </select></div>
   </div>
   ${cfg.extraFields.length?`<div class="f2">${extraHTML(cfg)}</div>`:''}
   <div class="f"><span class="lbl">Tone</span><select id="s-tone" onchange="syncS()">
@@ -754,7 +908,8 @@ function go(n){
   if(panel)panel.classList.add('on');
   const tab=document.querySelector('[data-ti="'+n+'"]');
   if(tab)tab.classList.add('on');
-  renderSceneNav();
+  currentTab=n;
+  renderSceneNav();scheduleSave();
 }
 
 // ══════════════════════════════
@@ -763,16 +918,16 @@ function go(n){
 function v(id){return document.getElementById(id)?.value||'';}
 function syncS(){
   S.title=v('s-title');S.logline=v('s-logline');S.setting=v('s-set');
-  S.themes=v('s-themes');S.protagonist=v('s-proto');S.conflict=v('s-conf');S.tone=v('s-tone');
+  S.themes=v('s-themes');S.tone=v('s-tone');S.genre=v('s-genre');
   const cfg=PT[selectedType];
   S.extra={};
   cfg.extraFields.forEach(f=>{S.extra[f.id]=v('ef-'+f.id);});
-  updateStats();
+  updateStats();scheduleSave();
 }
 function updateStats(){
   const w=S.script.split(/\s+/).filter(Boolean).length;
   const pg=Math.max(0,Math.round(w/185));
-  const scn=(S.script.match(/^(INT\.|EXT\.|SCENE|SEGMENT\s|SHOT\s)/gm)||[]).length;
+  const scn=(S.script.match(/^(\d+\.?\s+)?(INT\.|EXT\.|SCENE|SEGMENT\s|SHOT\s)/gm)||[]).length;
   const se=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
   se('h-pg',pg);se('h-sc',S.scenes.length||scn);se('h-ca',S.cast.length);
   se('st-pg',pg);se('st-wd',w>999?(w/1000).toFixed(1)+'k':w);
@@ -786,27 +941,106 @@ function updateStats(){
 //  Routes through /api/claude proxy on server
 // ══════════════════════════════
 const API='/api/claude';
-const MDL='claude-sonnet-4-6';
+const MDL='claude-sonnet-4-5';
+
+// Shared craft directives applied to all script generation calls.
+const HUMAN_VOICE=`
+CRAFT RULES — write like a working screenwriter, not an AI:
+- Specific, sensory detail over abstract description. Concrete nouns, active verbs.
+- Vary sentence length sharply. Fragments are welcome. Some lines stand alone.
+- No purple prose, no adverb stacks, no "suddenly", no "begins to", no "starts to".
+- Cut filler ("very", "really", "just", "in order to"). Trust the reader.
+- Dialogue: each character has a distinct rhythm. Real people interrupt, trail off, contradict themselves. Use subtext — characters rarely say what they actually mean.
+- Action lines: present tense, third person, lean. White space is a tool.
+- No on-the-nose exposition. No summaries of feelings — show them.
+- Avoid AI tells: balanced lists of three, "tapestry", "weaves", "delve", "navigate", em-dash overuse, pat resolutions.
+
+SCENE NUMBERING — production-ready format:
+- Number every scene heading sequentially: 1, 2, 3...
+- Format: "1   INT. LOCATION - DAY" (number, three spaces, slug). One scene = one number.
+- Numbers reset for new acts only if the format requires (TV pilots).
+- Do not renumber mid-script. Do not skip numbers.`;
+
+function _scExtractErr(e,fallback){
+  if(!e) return 'Error '+fallback;
+  if(typeof e.error==='string') return e.error;
+  if(e.error&&typeof e.error.message==='string') return e.error.message;
+  if(typeof e.message==='string') return e.message;
+  return 'Error '+fallback;
+}
 
 async function stream(sys,user,onChunk,onDone){
+  // Gate on Firebase auth — AI features require a signed-in user.
+  if(!window.SC?.configured){
+    const msg='Firebase is not configured yet. Add your project values to firebase-config.js.';
+    onChunk?.(msg); onDone?.(''); return;
+  }
+  if(!window.SC.getCurrentUser()){
+    openAuth('Sign in to use AI generation.');
+    onChunk?.('Sign in required. Use the button above to continue.'); onDone?.(''); return;
+  }
+  let token=null;
+  try{token=await window.SC.getIdToken();}catch{}
+  if(!token){
+    openAuth('Your session expired. Please sign in again.');
+    onChunk?.('Session expired — please sign in again.'); onDone?.(''); return;
+  }
+
+  let res;
   try{
-    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:MDL,max_tokens:2000,stream:true,system:sys,messages:[{role:'user',content:user}]})});
-    if(!res.ok){const e=await res.json();onChunk?.('Error: '+(e?.error?.message||res.status));onDone?.('');return;}
-    const reader=res.body.getReader(),dec=new TextDecoder();
-    let buf='',full='';
+    res=await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'text/event-stream','Authorization':'Bearer '+token},
+      body:JSON.stringify({model:MDL,max_tokens:2000,stream:true,system:sys,messages:[{role:'user',content:user}]})
+    });
+  }catch(e){
+    onChunk?.('Network error: '+(e?.message||e)); onDone?.(''); return;
+  }
+  if(res.status===401){
+    openAuth('Your session expired. Please sign in again.');
+    onChunk?.('Session expired.'); onDone?.(''); return;
+  }
+  if(!res.ok){
+    let msg='Error '+res.status;
+    try{const j=await res.json(); msg=_scExtractErr(j,res.status);}catch{ try{msg=await res.text()||msg;}catch{} }
+    onChunk?.('AI request failed — '+msg); onDone?.(''); return;
+  }
+  const ct=res.headers.get('content-type')||'';
+  if(ct.includes('application/json')){
+    try{const j=await res.json(); onChunk?.('AI request failed — '+_scExtractErr(j,res.status));}catch{}
+    onDone?.(''); return;
+  }
+  if(!res.body){onChunk?.('AI request failed — empty response.');onDone?.('');return;}
+  const reader=res.body.getReader(),dec=new TextDecoder();
+  let buf='',full='';
+  try{
     while(true){
       const{done,value}=await reader.read();if(done)break;
       buf+=dec.decode(value,{stream:true});
       const lines=buf.split('\n');buf=lines.pop()??'';
       for(const line of lines){
-        if(!line.startsWith('data: '))continue;
-        const d=line.slice(6).trim();if(d==='[DONE]'){onDone?.(full);return;}
-        try{const j=JSON.parse(d);if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){full+=j.delta.text;onChunk?.(j.delta.text,full);}}catch(e){}
+        const trimmed=line.trim();
+        if(!trimmed||trimmed.startsWith('event:')) continue;
+        if(!trimmed.startsWith('data:')) continue;
+        const d=trimmed.slice(5).trim();
+        if(!d) continue;
+        if(d==='[DONE]'){onDone?.(full);return;}
+        let j; try{j=JSON.parse(d);}catch{continue;}
+        if(j.type==='content_block_delta'&&j.delta?.type==='text_delta'){
+          full+=j.delta.text; onChunk?.(j.delta.text,full);
+        } else if(j.type==='message_stop'){
+          onDone?.(full); return;
+        } else if(j.type==='error'){
+          onChunk?.('\nAI error — '+(j.error?.message||'unknown'));
+          onDone?.(full); return;
+        }
       }
     }
     onDone?.(full);
-  }catch(e){onChunk?.('\nError: '+e.message);onDone?.('');}
+  }catch(e){
+    onChunk?.('\nStream interrupted: '+(e?.message||e));
+    onDone?.(full);
+  }
 }
 
 // ══════════════════════════════
@@ -821,7 +1055,7 @@ async function devStory(){
   const cfg=PT[selectedType];
   const sys=`You are a senior script consultant specializing in ${cfg.name}. Give concise, expert, actionable notes specific to this format (${cfg.pages}, ${cfg.runtime}).`;
   const extras=Object.entries(S.extra).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n');
-  const p=`Analyze this ${cfg.name} concept (3–4 paragraphs):\nTitle: ${S.title}\nFormat: ${selectedFmt||cfg.name}\nLogline: ${S.logline}\nSetting: ${S.setting}\nThemes: ${S.themes}\nProtagonist: ${S.protagonist}\nConflict: ${S.conflict}\n${extras}\n\n1) What's compelling and cinematic 2) What needs sharpening 3) Comparable ${cfg.name}s 4) One key note to elevate this project.`;
+  const p=`Analyze this ${cfg.name} concept (3–4 paragraphs):\nTitle: ${S.title}\nFormat: ${selectedFmt||cfg.name}\nLogline: ${S.logline}\nSetting: ${S.setting}\nThemes: ${S.themes}\nTone: ${S.tone}\n${extras}\n\n1) What's compelling and cinematic 2) What needs sharpening 3) Comparable ${cfg.name}s 4) One key note to elevate this project.`;
   await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{hide('sp1');setDot('ab1dot',false);});
 }
 
@@ -852,7 +1086,7 @@ function parseSuggAndAdd(){
     const desc=parts.slice(2).join('—').trim();
     if(!S.cast.find(c=>c.name===name)){S.cast.push({name,role,desc});added++;}
   });
-  renderCast();updateStats();
+  renderCast();updateStats();scheduleSave();
   notify(added>0?`${added} imported!`:'No entries found. Edit suggestions then retry.');
 }
 
@@ -879,10 +1113,10 @@ function addChar(){
   if(!n)return;
   if(editingCharIdx>=0)S.cast[editingCharIdx]={name:n,role:r,desc:d};
   else S.cast.push({name:n,role:r,desc:d});
-  renderCast();updateStats();
+  renderCast();updateStats();scheduleSave();
   document.getElementById('cf-n').value='';document.getElementById('cf-d').value='';closeCF();
 }
-function remChar(i){if(confirm('Remove?')){S.cast.splice(i,1);renderCast();updateStats();}}
+function remChar(i){if(confirm('Remove?')){S.cast.splice(i,1);renderCast();updateStats();scheduleSave();}}
 function renderCast(){
   const g=document.getElementById('cGrid');if(!g)return;
   g.innerHTML=S.cast.map((c,i)=>`
@@ -913,7 +1147,7 @@ async function genOutline(){
   await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{
     hide('sp3');setDot('ab3dot',false);
     document.getElementById('ab3-wrap').style.display='none';
-    parseScenes(full);updateStats();renderSceneNav();
+    parseScenes(full);updateStats();renderSceneNav();scheduleSave();
   });
 }
 function parseScenes(txt){
@@ -955,12 +1189,12 @@ function renderSceneList(){
   }).join('');
   updateStats();
 }
-function saveScene(i,f,val){if(S.scenes[i])S.scenes[i][f]=val.trim();}
-function deleteScene(i){S.scenes.splice(i,1);S.scenes.forEach((s,j)=>s.num=j+1);renderSceneList();renderSceneNav();updateStats();}
+function saveScene(i,f,val){if(S.scenes[i]){S.scenes[i][f]=val.trim();scheduleSave();}}
+function deleteScene(i){S.scenes.splice(i,1);S.scenes.forEach((s,j)=>s.num=j+1);renderSceneList();renderSceneNav();updateStats();scheduleSave();}
 function addBlankScene(){
   const cfg=PT[selectedType];
   S.scenes.push({num:S.scenes.length+1,loc:cfg.unitSingular.toUpperCase()+' '+(S.scenes.length+1)+' — LOCATION',desc:'Describe what happens here...'});
-  renderSceneList();renderSceneNav();updateStats();
+  renderSceneList();renderSceneNav();updateStats();scheduleSave();
 }
 function renderSceneNav(){
   const nav=document.getElementById('snav');if(!nav)return;
@@ -994,10 +1228,10 @@ function importPaste(){
   const txt=document.getElementById('spPaste')?.value.trim();
   if(!txt){notify('Nothing to import.');return;}
   S.script=txt;document.getElementById('spPaste').value='';
-  setMode('preview');updateStats();notify('Draft imported!');
+  setMode('preview');updateStats();scheduleSave();notify('Draft imported!');
 }
 function cancelPaste(){document.getElementById('spPaste').value='';setMode('preview');}
-function onEditorInput(){S.script=document.getElementById('spEditor')?.value||'';updateStats();}
+function onEditorInput(){S.script=document.getElementById('spEditor')?.value||'';updateStats();scheduleSave();}
 
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function parseSP(txt){
@@ -1007,7 +1241,7 @@ function parseSP(txt){
     const tr=t.trim();
     if(!tr){html+='<div class="spbl"></div>';if(prev==='action')inDial=false;continue;}
     if(/^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO:|SMASH CUT TO:|DISSOLVE TO:|THE END|IRIS IN:|IRIS OUT\.|ACT ONE|ACT TWO|ACT THREE|END OF ACT|TAG:|COLD OPEN:)$/.test(tr)){html+=`<div class="sptr">${esc(tr)}</div>`;inDial=false;prev='trans';continue;}
-    if(/^(INT\.|EXT\.|I\/E\.|B-ROLL:|SCENE\s\d|SEGMENT\s\d|SHOT\s\d|SOUND:|MUSIC:|VISUAL:|SETTING:)/.test(tr)){html+=`<div class="spsh">${esc(tr)}</div>`;inDial=false;prev='sh';continue;}
+    if(/^(\d+\.?\s+)?(INT\.|EXT\.|I\/E\.|B-ROLL:|SCENE\s\d|SEGMENT\s\d|SHOT\s\d|SOUND:|MUSIC:|VISUAL:|SETTING:)/.test(tr)){html+=`<div class="spsh">${esc(tr)}</div>`;inDial=false;prev='sh';continue;}
     if(tr.startsWith('(')&&tr.endsWith(')')&&inDial){html+=`<div class="sppa">${esc(tr)}</div>`;prev='paren';continue;}
     if(/^[A-Z][A-Z\s'\-()\.V]+$/.test(tr)&&tr.length<45&&!tr.endsWith('TO:')&&!tr.startsWith('INT')&&!tr.startsWith('EXT')&&!tr.startsWith('B-')&&tr.split(' ').length<=6){html+=`<div class="spch">${esc(tr)}</div>`;inDial=true;prev='char';continue;}
     if(inDial&&prev!=='sh'&&prev!=='action'){html+=`<div class="spdi">${esc(tr)}</div>`;prev='dial';continue;}
@@ -1028,7 +1262,7 @@ async function genScript(){
   const cs=S.cast.map(c=>`${c.name} (${c.role}): ${c.desc}`).join('\n')||'As per story';
   const ss=S.scenes.length?S.scenes.map(s=>`${s.num}. ${s.loc} — ${s.desc}`).join('\n'):'Generate from logline';
   const extras=Object.entries(S.extra).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join('\n');
-  const p=`Write a professional ${cfg.name} script:\nTITLE: ${S.title||'Untitled'}\nFORMAT: ${selectedFmt||cfg.name}\nLOGLINE: ${S.logline}\nSETTING: ${S.setting}\nTHEMES: ${S.themes}\nTONE: ${S.tone}\n${extras}\n\nCAST:\n${cs}\n\nOUTLINE:\n${ss}\n\nWrite in professional ${cfg.name} format. Begin with FADE IN:.`;
+  const p=`Write a professional ${cfg.name} script:\nTITLE: ${S.title||'Untitled'}\nFORMAT: ${selectedFmt||cfg.name}\nLOGLINE: ${S.logline}\nSETTING: ${S.setting}\nTHEMES: ${S.themes}\nTONE: ${S.tone}\n${extras}\n\nCAST:\n${cs}\n\nOUTLINE:\n${ss}\n\nWrite in professional ${cfg.name} format. Begin with FADE IN:.\n${HUMAN_VOICE}`;
   const spc=document.getElementById('spContent');
   spc.innerHTML='';const cur=document.createElement('span');cur.className='gen-cursor';
   await stream(cfg.scriptSys,p,(c,full)=>{
@@ -1037,7 +1271,7 @@ async function genScript(){
   },(full)=>{
     S.script=full;renderSP();hide('sp4');
     document.getElementById('gsbtn').disabled=false;isGen=false;
-    updateStats();renderSceneNav();
+    updateStats();renderSceneNav();scheduleSave();
     notify('Generated! ~'+Math.round(full.split(/\s+/).length/185)+' pages');
   });
 }
@@ -1049,7 +1283,7 @@ async function wScene(idx){
   const cfg=PT[selectedType];
   const cs=S.cast.map(c=>`${c.name} (${c.role}): ${c.desc}`).join('\n')||'';
   const sys=`You are a professional ${cfg.name} writer. Write ONE complete scene/segment in proper format. Start directly with the heading.`;
-  const p=`Write this single ${cfg.unitSingular.toLowerCase()}:\n${sc.loc} — ${sc.desc}\nTitle: ${S.title}\nCast: ${cs}\nTone: ${S.tone||'cinematic'}\nStart with the heading. Write complete content. End with a transition.`;
+  const p=`Write this single ${cfg.unitSingular.toLowerCase()} (number it ${sc.num}):\n${sc.loc} — ${sc.desc}\nTitle: ${S.title}\nCast: ${cs}\nTone: ${S.tone||'cinematic'}\nStart with the numbered heading like "${sc.num}   ${sc.loc}". Write complete content. End with a transition.\n${HUMAN_VOICE}`;
   const existing=S.script?S.script+'\n\n':'';
   const spc=document.getElementById('spContent');
   const cur=document.createElement('span');cur.className='gen-cursor';
@@ -1059,14 +1293,14 @@ async function wScene(idx){
   },(full)=>{
     S.script=existing+full;renderSP();hide('sp4');
     document.getElementById('gsbtn').disabled=false;isGen=false;
-    updateStats();renderSceneNav();notify(cfg.unitSingular+' '+sc.num+' written!');
+    updateStats();renderSceneNav();scheduleSave();notify(cfg.unitSingular+' '+sc.num+' written!');
   });
 }
 async function appendScene(idx){await wScene(idx);}
 function clearSc(){
   if(S.script&&!confirm('Clear the entire script?'))return;
   S.script='';renderSP();const e=document.getElementById('spEditor');if(e)e.value='';
-  updateStats();renderSceneNav();
+  updateStats();renderSceneNav();scheduleSave();
 }
 
 // ══════════════════════════════
@@ -1102,7 +1336,7 @@ function acceptPolish(){
   const polished=af?.value;
   if(!polished){notify('Run a polish tool first.');return;}
   if(confirm('Replace your current script with the polished version?')){
-    S.script=polished;renderSP();updateStats();
+    S.script=polished;renderSP();updateStats();scheduleSave();
     const e=document.getElementById('spEditor');if(e)e.value=polished;
     notify('Accepted!');go(3);
   }
@@ -1128,6 +1362,365 @@ function show(id){const e=document.getElementById(id);if(e)e.style.display='inli
 function hide(id){const e=document.getElementById(id);if(e)e.style.display='none';}
 function notify(msg){const n=document.getElementById('notif');if(!n)return;n.textContent=msg;n.classList.add('on');setTimeout(()=>n.classList.remove('on'),2800);}
 function setDot(id,anim){const d=document.getElementById(id);if(d)d.classList.toggle('anim',anim);}
+
+// ══════════════════════════════
+//  AUTH UI
+// ══════════════════════════════
+function openAuth(subMsg){
+  const o=document.getElementById('authOverlay');if(!o)return;
+  if(subMsg){const s=document.getElementById('authSub');if(s)s.textContent=subMsg;}
+  hideAuthErr();o.classList.add('on');
+}
+function closeAuth(){document.getElementById('authOverlay')?.classList.remove('on');}
+function showAuthErr(msg){const e=document.getElementById('authErr');if(!e)return;e.textContent=msg;e.hidden=false;}
+function hideAuthErr(){const e=document.getElementById('authErr');if(e)e.hidden=true;}
+function humanizeAuthError(e){
+  const c=e?.code||'';const m=e?.message||String(e);
+  if(c.includes('popup-closed-by-user'))return 'Sign-in window closed before completing.';
+  if(c.includes('popup-blocked'))return 'Pop-up blocked. Allow pop-ups for this site and try again.';
+  if(c.includes('network-request-failed'))return 'Network error. Check your connection.';
+  if(c.includes('unauthorized-domain'))return 'This domain is not authorized in Firebase Auth. Add it under Authentication → Settings → Authorized domains.';
+  return m.replace(/^Firebase:\s*/,'').replace(/\s*\(auth\/[^)]+\)\.?$/,'');
+}
+async function doGoogleSignIn(){
+  hideAuthErr();
+  const btn=document.getElementById('authGoogle');if(btn)btn.disabled=true;
+  try{
+    if(!window.SC?.configured){showAuthErr('Firebase is not configured. Edit firebase-config.js with your project values.');return;}
+    await window.SC.signInGoogle();
+    closeAuth();notify('Welcome!');
+  }catch(e){showAuthErr(humanizeAuthError(e));}
+  finally{if(btn)btn.disabled=false;}
+}
+function onUserPillClick(){
+  if(!window.SC?.getCurrentUser()){openAuth();return;}
+  toggleUserMenu();
+}
+function toggleUserMenu(){
+  const existing=document.getElementById('userMenu');
+  if(existing){existing.remove();return;}
+  const u=window.SC?.getCurrentUser();if(!u)return;
+  const onSelect=document.getElementById('scr-select')?.classList.contains('on');
+  const anchor=document.getElementById(onSelect?'userPillSel':'userPill');
+  const r=anchor.getBoundingClientRect();
+  const m=document.createElement('div');m.id='userMenu';m.className='user-menu';
+  m.style.top=(r.bottom+6)+'px';m.style.right=(window.innerWidth-r.right)+'px';
+  const q=window.SC.getQuota?.();
+  const qStr=q?`Tokens: <b style="color:var(--g)">${q.used.toLocaleString()}</b> / ${q.quota.toLocaleString()} <span style="color:var(--mu)">(${q.tier})</span>`:'Tokens: <i style="color:var(--mu)">loading…</i>';
+  m.innerHTML=`<div class="user-menu-head">
+      <div>${esc(u.displayName||u.email||'Account')}</div>
+      <div class="um-email">${esc(u.email||'')}</div>
+      <div class="um-email" style="margin-top:6px;">${qStr}</div>
+    </div>
+    <button class="user-menu-item" type="button" onclick="document.getElementById('userMenu')?.remove();openDrafts();">My projects</button>
+    <button class="user-menu-item" type="button" onclick="document.getElementById('userMenu')?.remove();startNewProject();">New project</button>
+    <button class="user-menu-item danger" type="button" onclick="doSignOut()">Sign out</button>`;
+  document.body.appendChild(m);
+  setTimeout(()=>document.addEventListener('click',closeUserMenuOnce,{once:true}),0);
+}
+function closeUserMenuOnce(ev){
+  const m=document.getElementById('userMenu');if(!m)return;
+  if(ev&&(m.contains(ev.target)||ev.target.closest('.auth-pill')))return;
+  m.remove();
+}
+async function doSignOut(){
+  document.getElementById('userMenu')?.remove();
+  try{await window.SC.signOut();notify('Signed out');}catch{notify('Sign out failed');}
+}
+function updateAuthUI(user,quota){
+  const sets=[
+    {pill:document.getElementById('userPill'),av:document.getElementById('userAvatar'),lab:document.getElementById('userLabel')},
+    {pill:document.getElementById('userPillSel'),av:document.getElementById('userAvatarSel'),lab:document.getElementById('userLabelSel')},
+  ];
+  for(const {pill,av,lab} of sets){
+    if(!pill)continue;
+    if(user){
+      pill.classList.add('signed-in');
+      if(user.photoURL){av.style.backgroundImage=`url('${user.photoURL}')`;av.textContent='';}
+      else{av.style.backgroundImage='';av.textContent=((user.displayName||user.email||'?').trim()[0]||'?').toUpperCase();}
+      lab.textContent=user.displayName||user.email||'Account';
+    }else{
+      pill.classList.remove('signed-in');
+      av.style.backgroundImage='';av.textContent='?';
+      lab.textContent='Sign in';
+    }
+  }
+  const q=document.getElementById('hdQuota');
+  if(q){
+    if(user&&quota){
+      const pct=quota.quota?Math.round((quota.used/quota.quota)*100):0;
+      q.innerHTML=`<b>${pct}%</b> used`;
+      q.classList.toggle('warn',pct>=85);
+      q.title=`${quota.used.toLocaleString()} / ${quota.quota.toLocaleString()} tokens this month (${quota.tier})`;
+      q.hidden=false;
+    }else{q.hidden=true;}
+  }
+}
+window.addEventListener('sc:ready',()=>{
+  if(!window.SC?.configured){
+    // No config yet — leave the pill saying "Sign in" but show a helpful error in the modal.
+    return;
+  }
+  window.SC.onAuth((user,quota)=>{
+    updateAuthUI(user,quota);
+    if(user){tryResume(user);refreshDraftsCount();}
+    else{currentDraftId=null;didResume=false;updateDraftsCount(0,false);closeDrafts();}
+  });
+});
+
+// ══════════════════════════════
+//  RESUME / PERSISTENCE
+// ══════════════════════════════
+function buildPayload(){
+  return{
+    type:selectedType,
+    fmt:selectedFmt,
+    tab:currentTab,
+    title:S.title||'Untitled',
+    state:{
+      title:S.title||'',logline:S.logline||'',setting:S.setting||'',
+      themes:S.themes||'',tone:S.tone||'',genre:S.genre||'',
+      extra:S.extra||{},
+      cast:Array.isArray(S.cast)?S.cast:[],
+      scenes:Array.isArray(S.scenes)?S.scenes:[],
+      script:S.script||''
+    }
+  };
+}
+function scheduleSave(){
+  if(suppressSave)return;
+  if(!window.SC?.getCurrentUser())return; // anonymous: stay in-memory only
+  if(!selectedType)return;                  // nothing to save yet
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    try{
+      const payload=buildPayload();
+      if(!currentDraftId){
+        currentDraftId=await window.SC.drafts.create(payload);
+        if(currentDraftId){await window.SC.drafts.setActive(currentDraftId);refreshDraftsCount();}
+      }else{
+        await window.SC.drafts.save(currentDraftId,payload);
+      }
+    }catch(err){console.warn('Draft save failed:',err);}
+  },1500);
+}
+async function tryResume(user){
+  if(didResume)return;
+  // If they're already mid-edit (typed something while signed-out), keep that work
+  // and let the next save associate it with their account.
+  const onApp=document.getElementById('scr-app').classList.contains('on');
+  const hasLocal=onApp&&(S.title||S.logline||S.script||S.cast.length||S.scenes.length);
+  if(hasLocal){
+    didResume=true;
+    scheduleSave(); // promote the in-memory draft to cloud
+    return;
+  }
+  didResume=true;
+  await resumeActiveDraft();
+}
+async function resumeActiveDraft(){
+  if(!window.SC?.getCurrentUser())return false;
+  let id;
+  try{id=await window.SC.drafts.getActive();}catch{return false;}
+  if(!id)return false;
+  let d;
+  try{d=await window.SC.drafts.get(id);}catch{return false;}
+  if(!d||!d.type||!PT[d.type])return false;
+  suppressSave=true;
+  currentDraftId=id;
+  selectedType=d.type;
+  selectedFmt=d.fmt||null;
+  const ds=d.state||{};
+  S={
+    title:ds.title||'',logline:ds.logline||'',setting:ds.setting||'',
+    themes:ds.themes||'',tone:ds.tone||'',genre:ds.genre||'',
+    extra:ds.extra||{},
+    cast:Array.isArray(ds.cast)?ds.cast:[],
+    scenes:Array.isArray(ds.scenes)?ds.scenes:[],
+    script:ds.script||''
+  };
+  buildApp();
+  restoreFormFields();
+  document.getElementById('scr-select').classList.remove('on');
+  document.getElementById('scr-app').classList.add('on');
+  go(typeof d.tab==='number'?d.tab:0);
+  suppressSave=false;
+  notify('Welcome back — resumed your draft');
+  return true;
+}
+async function flushSave(){
+  if(saveTimer){clearTimeout(saveTimer);saveTimer=null;}
+  if(!window.SC?.getCurrentUser())return;
+  if(!selectedType)return;
+  try{
+    const payload=buildPayload();
+    if(!currentDraftId){
+      currentDraftId=await window.SC.drafts.create(payload);
+      if(currentDraftId)await window.SC.drafts.setActive(currentDraftId);
+    }else{
+      await window.SC.drafts.save(currentDraftId,payload);
+    }
+  }catch(err){console.warn('Flush save failed:',err);}
+}
+
+// ══════════════════════════════
+//  DRAFTS / MULTI-PROJECT
+// ══════════════════════════════
+function fmtDate(ts){
+  if(!ts)return'';
+  let d;
+  try{d=ts.toDate?ts.toDate():(ts.seconds?new Date(ts.seconds*1000):new Date(ts));}catch{return'';}
+  if(isNaN(d.getTime()))return'';
+  const now=Date.now(),diff=(now-d.getTime())/1000;
+  if(diff<60)return'just now';
+  if(diff<3600)return Math.floor(diff/60)+'m ago';
+  if(diff<86400)return Math.floor(diff/3600)+'h ago';
+  if(diff<604800)return Math.floor(diff/86400)+'d ago';
+  return d.toLocaleDateString();
+}
+async function openDrafts(){
+  if(!window.SC?.getCurrentUser()){openAuth('Sign in to view your saved projects.');return;}
+  const o=document.getElementById('draftsOverlay');if(!o)return;
+  o.classList.add('on');
+  await refreshDraftsList();
+}
+function closeDrafts(){document.getElementById('draftsOverlay')?.classList.remove('on');}
+async function refreshDraftsList(){
+  const listEl=document.getElementById('draftsList');
+  const emptyEl=document.getElementById('draftsEmpty');
+  if(!listEl)return;
+  listEl.innerHTML='<div class="drafts-empty"><span class="spin" style="display:inline-block"></span> Loading…</div>';
+  let drafts=[];
+  try{drafts=await window.SC.drafts.list();}catch{drafts=[];}
+  updateDraftsCount(drafts.length);
+  if(!drafts.length){listEl.innerHTML='';emptyEl.hidden=false;return;}
+  emptyEl.hidden=true;
+  listEl.innerHTML=drafts.map(d=>{
+    const cfg=PT[d.type]||{ico:'📄',name:'Project'};
+    const isCurrent=d.id===currentDraftId;
+    const ttl=esc(d.title||d.state?.title||'Untitled');
+    const fmt=esc(d.fmt||cfg.name||'');
+    const when=fmtDate(d.updatedAt);
+    return`<div class="draft-row${isCurrent?' current':''}" onclick="switchToDraft('${d.id}')">
+      <div class="draft-ico">${cfg.ico}</div>
+      <div class="draft-meta">
+        <div class="draft-title">${ttl}${isCurrent?'<span class="draft-current-badge">Open</span>':''}</div>
+        <div class="draft-sub">${fmt}${when?' · '+when:''}</div>
+      </div>
+      <div class="draft-actions" onclick="event.stopPropagation()">
+        <button type="button" title="Rename" onclick="renameDraftPrompt('${d.id}','${ttl.replace(/'/g,"\\'")}')">✏</button>
+        <button type="button" class="danger" title="Delete" onclick="deleteDraftConfirm('${d.id}','${ttl.replace(/'/g,"\\'")}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function refreshDraftsCount(){
+  if(!window.SC?.getCurrentUser()){updateDraftsCount(0,false);return;}
+  try{const list=await window.SC.drafts.list();updateDraftsCount(list.length,true);}
+  catch{updateDraftsCount(0,false);}
+}
+function updateDraftsCount(n,visible=true){
+  for(const btnId of['draftsBtn','draftsBtnSel']){
+    const btn=document.getElementById(btnId);
+    if(btn)btn.hidden=!visible;
+  }
+  for(const cId of['draftsCount','draftsCountSel']){
+    const c=document.getElementById(cId);
+    if(!c)continue;
+    if(n>0){c.textContent=n;c.hidden=false;}else{c.hidden=true;}
+  }
+}
+async function switchToDraft(id){
+  if(id===currentDraftId){closeDrafts();return;}
+  await flushSave();
+  let d;
+  try{d=await window.SC.drafts.get(id);}catch{notify('Could not load draft');return;}
+  if(!d||!d.type||!PT[d.type]){notify('Draft is missing data');return;}
+  suppressSave=true;
+  currentDraftId=id;
+  selectedType=d.type;
+  selectedFmt=d.fmt||null;
+  const ds=d.state||{};
+  S={
+    title:ds.title||'',logline:ds.logline||'',setting:ds.setting||'',
+    themes:ds.themes||'',tone:ds.tone||'',genre:ds.genre||'',
+    extra:ds.extra||{},
+    cast:Array.isArray(ds.cast)?ds.cast:[],
+    scenes:Array.isArray(ds.scenes)?ds.scenes:[],
+    script:ds.script||''
+  };
+  try{await window.SC.drafts.setActive(id);}catch{}
+  buildApp();
+  restoreFormFields();
+  document.getElementById('scr-select').classList.remove('on');
+  document.getElementById('scr-app').classList.add('on');
+  go(typeof d.tab==='number'?d.tab:0);
+  suppressSave=false;
+  closeDrafts();
+  notify('Switched to "'+(d.title||'Untitled')+'"');
+}
+async function startNewProject(){
+  await flushSave();
+  closeDrafts();
+  suppressSave=true;
+  currentDraftId=null;
+  selectedType=null;
+  selectedFmt=null;
+  S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
+  // Reset select-screen UI
+  document.querySelectorAll('.ptcard').forEach(c=>c.classList.remove('sel'));
+  const row=document.getElementById('fmtRow');
+  if(row){row.style.display='none';row.querySelectorAll('.fpill').forEach(p=>p.remove());}
+  const cta=document.getElementById('ctaBtn');if(cta)cta.classList.remove('ready');
+  const ico=document.getElementById('ctaIco');if(ico)ico.textContent='✦';
+  const hint=document.getElementById('ctaHint');if(hint)hint.textContent='Select a project type above to begin';
+  document.getElementById('scr-app').classList.remove('on');
+  document.getElementById('scr-select').classList.add('on');
+  suppressSave=false;
+}
+async function renameDraftPrompt(id,oldTitle){
+  const t=prompt('Rename project:',oldTitle||'');
+  if(t==null)return;
+  const trimmed=t.trim();if(!trimmed)return;
+  try{
+    await window.SC.drafts.rename(id,trimmed);
+    if(id===currentDraftId){
+      S.title=trimmed;
+      const inp=document.getElementById('s-title');if(inp)inp.value=trimmed;
+      updateStats();scheduleSave();
+    }
+    refreshDraftsList();notify('Renamed');
+  }catch{notify('Rename failed');}
+}
+async function deleteDraftConfirm(id,title){
+  if(!confirm(`Delete "${title}"? This can't be undone.`))return;
+  try{
+    await window.SC.drafts.delete(id);
+    if(id===currentDraftId){
+      // The currently-open draft was deleted: drop in-memory pointer; subsequent edits create a new draft.
+      currentDraftId=null;
+    }
+    refreshDraftsList();refreshDraftsCount();notify('Deleted');
+  }catch{notify('Delete failed');}
+}
+function restoreFormFields(){
+  const set=(id,val)=>{const e=document.getElementById(id);if(e&&val!=null)e.value=val;};
+  set('s-title',S.title);
+  set('s-logline',S.logline);
+  set('s-set',S.setting);
+  set('s-themes',S.themes);
+  set('s-tone',S.tone);
+  set('s-genre',S.genre);
+  const cfg=PT[selectedType];
+  if(cfg&&Array.isArray(cfg.extraFields)){
+    cfg.extraFields.forEach(f=>set('ef-'+f.id,S.extra?.[f.id]));
+  }
+  renderCast();renderSceneList();renderSceneNav();renderSP();updateStats();
+}
+// Close modals on Escape, click outside.
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){closeAuth();closeDrafts();}});
+document.getElementById('authOverlay')?.addEventListener('click',(e)=>{if(e.target.id==='authOverlay')closeAuth();});
+document.getElementById('draftsOverlay')?.addEventListener('click',(e)=>{if(e.target.id==='draftsOverlay')closeDrafts();});
 </script>
 </body>
 </html>

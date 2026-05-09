@@ -4,10 +4,10 @@
 // These values are NOT secrets — they identify the project. Security is enforced by
 // Firebase Auth provider rules and Firestore security rules (see firestore.rules).
 window.__FIREBASE_CONFIG__ = {
-  apiKey: "REPLACE_ME_API_KEY",
-  authDomain: "REPLACE_ME.firebaseapp.com",
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME.appspot.com",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME"
+  apiKey: "AIzaSyAsZccZECoCjFimPcZ4LEXqtgoKs_aUHTw",
+  authDomain: "scenecraft-studio-7417b.firebaseapp.com",
+  projectId: "scenecraft-studio-7417b",
+  storageBucket: "scenecraft-studio-7417b.firebasestorage.app",
+  messagingSenderId: "312518580680",
+  appId: "1:312518580680:web:2224f72ff760e797ec88fd"
 };
