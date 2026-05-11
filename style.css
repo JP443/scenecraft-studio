@@ -1089,11 +1089,62 @@ select option{background:var(--bg2);}
   :root{--tool-w:380px;}
 }
 
-/* ── PRINT ── */
+/* ── PRINT (industry-standard screenplay PDF) ──
+   US Letter, 12pt Courier, 1.5" left / 1" other margins.
+   Inch-based indents per WGA / industry convention:
+     Action       margin-left: 0       (page-left = 1.5")
+     Dialogue     margin-left: 1.0"    (page-left = 2.5")
+     Parenthetical margin-left: 1.6"   (page-left = 3.1")
+     Character    margin-left: 2.2"    (page-left = 3.7")
+     Transition   right-aligned        (page-right = 1.0")
+*/
+@page{size:Letter;margin:1in 1in 1in 1.5in;}
 @media print{
-  .hd,.tool,.sp-toolbar,.spmeta,.notif,.hd-menu-btn,.mobile-nav,.mobile-nav-overlay{display:none!important;}
-  .sppage{box-shadow:none;padding:0;border-radius:0;}
-  body{background:#fff;color:#000;}
+  html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;}
+  .hd,.tool,.sp-toolbar,.spmeta,.notif,.hd-menu-btn,.mobile-nav,.mobile-nav-overlay,
+  .err-banner,.restore-toast,.noscript,.splash,.auth-overlay,.user-pill,.hd-quota,
+  .spempty,.gen-cursor,.spnum,#scr-select,#exportMenu,.verify-banner{display:none!important;}
+  /* Hide every screen the user is not currently exporting from */
+  .screen:not(.on){display:none!important;}
+  /* Strip all decorative chrome from the page wrapper */
+  .sppage,.sp-editor{
+    background:#fff!important;color:#000!important;
+    box-shadow:none!important;border:0!important;border-radius:0!important;
+    padding:0!important;margin:0!important;
+    font-family:'Courier Prime','Courier New',Courier,monospace!important;
+    font-size:12pt!important;line-height:1.0!important;
+    min-height:0!important;
+  }
+  /* Screenplay element indents in absolute inches — override percentage screen rules */
+  .spsh{
+    text-transform:uppercase;font-weight:700;
+    margin:0 0 12pt 0!important;padding:0!important;
+    page-break-after:avoid;page-break-inside:avoid;
+  }
+  .spac{
+    margin:0 0 12pt 0!important;padding:0!important;
+    orphans:2;widows:2;
+  }
+  .spch{
+    margin:12pt 0 0 0!important;padding:0 0 0 2.2in!important;
+    text-transform:uppercase;font-weight:400;
+    page-break-after:avoid;page-break-inside:avoid;
+  }
+  .sppa{
+    margin:0!important;padding:0 0 0 1.6in!important;
+    color:#000!important;font-style:normal!important;
+    page-break-before:avoid;page-break-after:avoid;
+  }
+  .spdi{
+    margin:0 0 12pt 0!important;padding:0 1.0in 0 1.0in!important;
+    page-break-before:avoid;orphans:2;widows:2;
+  }
+  .sptr{
+    text-align:right;text-transform:uppercase;font-weight:400;
+    margin:12pt 0!important;padding:0!important;
+    page-break-before:avoid;
+  }
+  .spbl{height:12pt!important;}
 }
 
 /* ── SCROLLBAR ── */
@@ -1211,11 +1262,6 @@ select option{background:var(--bg2);}
   .spdi{padding-left:6%;padding-right:6%;}
 }
 
-/* Print improvements */
-@media print{
-  .err-banner,.restore-toast,.noscript,.splash,.auth-overlay,.user-pill,.hd-quota{display:none!important;}
-  #scr-select{display:none!important;}
-}
 
 /* ══════════════════════════════════════
    AUTH UI

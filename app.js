@@ -596,7 +596,7 @@ function updateAuthUI(user,quota){
 }
 
 // ══════════════════════════════════════
-//  EXPORT MENU (TXT, PDF, FDX)
+//  EXPORT MENU (PDF, Fountain, FDX, TXT)
 // ══════════════════════════════════════
 function doExport(){
   if(!S.script){notify('Generate a script first!');return;}
@@ -609,9 +609,10 @@ function doExport(){
   menu.style.top=(r.bottom+6)+'px';
   menu.style.right=(window.innerWidth-r.right)+'px';
   menu.innerHTML=`
-    <button class="user-menu-item" type="button" onclick="exportTxt()">Plain text (.txt)</button>
-    <button class="user-menu-item" type="button" onclick="exportPdf()">PDF — print dialog</button>
-    <button class="user-menu-item" type="button" onclick="exportFdx()">Final Draft (.fdx)</button>`;
+    <button class="user-menu-item" type="button" onclick="exportPdf()">PDF — industry layout</button>
+    <button class="user-menu-item" type="button" onclick="exportFountain()">Fountain (.fountain)</button>
+    <button class="user-menu-item" type="button" onclick="exportFdx()">Final Draft (.fdx)</button>
+    <button class="user-menu-item" type="button" onclick="exportTxt()">Plain text (.txt)</button>`;
   document.body.appendChild(menu);
   setTimeout(()=>document.addEventListener('click',closeExportMenuOnce,{once:true}),0);
 }
@@ -636,6 +637,46 @@ function exportFdx(){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.fdx';a.click();
   URL.revokeObjectURL(a.href);notify('Exported .fdx');
 }
+function exportFountain(){
+  closeExportMenuOnce();
+  const text=buildFountain(S.script,S.title||'Untitled');
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.fountain';a.click();
+  URL.revokeObjectURL(a.href);notify('Exported .fountain');
+}
+function buildFountain(script,title){
+  // Fountain spec: https://fountain.io — universal plain-text screenplay format.
+  // Imports into Final Draft, Highland, Slugline, WriterDuet, Fade In, Trelby, KIT Scenarist, Celtx.
+  const author=(window.SC?.getCurrentUser?.()?.displayName)||'SceneCraft Studio';
+  const today=new Date().toISOString().slice(0,10);
+  const header=`Title: ${title}\nCredit: Written by\nAuthor: ${author}\nDraft date: ${today}\n\n`;
+  const lines=(script||'').split(/\r?\n/);
+  const out=[];let prev='';
+  for(const raw of lines){
+    const t=raw.trim();
+    if(!t){if(out.length&&out[out.length-1]!=='')out.push('');prev='';continue;}
+    if(/^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO:|DISSOLVE TO:|SMASH CUT TO:|MATCH CUT TO:|THE END)$/i.test(t)){
+      if(out.length&&out[out.length-1]!=='')out.push('');
+      out.push(t.toUpperCase());out.push('');prev='trans';continue;
+    }
+    if(/^(INT\.|EXT\.|I\/E\.|INT\/EXT\.|EST\.)/i.test(t)){
+      if(out.length&&out[out.length-1]!=='')out.push('');
+      out.push(t.toUpperCase());out.push('');prev='sh';continue;
+    }
+    if(/^[A-Z][A-Z0-9\s'\-(),\.]+$/.test(t)&&t.length<45&&!t.endsWith('TO:')&&t.split(/\s+/).length<=6){
+      if(out.length&&out[out.length-1]!=='')out.push('');
+      out.push(t);prev='char';continue;
+    }
+    if(t.startsWith('(')&&t.endsWith(')')&&(prev==='char'||prev==='dial')){
+      out.push(t);prev='paren';continue;
+    }
+    if(prev==='char'||prev==='dial'||prev==='paren'){
+      out.push(t);prev='dial';continue;
+    }
+    out.push(t);prev='action';
+  }
+  return header+out.join('\n').replace(/\n{3,}/g,'\n\n').trimEnd()+'\n';
+}
 function buildFdx(script,title){
   // Minimal Final Draft 8+ XML. Each line classified using the same heuristics as parseSP.
   const lines=(script||'').split('\n');
@@ -653,6 +694,7 @@ function buildFdx(script,title){
     else{type='Action';inDial=false;}
     paras.push(`    <Paragraph Type="${type}"><Text>${esc(tr)}</Text></Paragraph>`);
   }
+  const author=(window.SC?.getCurrentUser?.()?.displayName)||'SceneCraft Studio';
   return `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <FinalDraft DocumentType="Script" Template="No" Version="1">
   <Content>
@@ -661,7 +703,10 @@ ${paras.join('\n')}
   <TitlePage>
     <Content>
       <Paragraph Alignment="Center"><Text>${esc(title)}</Text></Paragraph>
-      <Paragraph Alignment="Center"><Text>by SceneCraft Studio</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text></Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Written by</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text></Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>${esc(author)}</Text></Paragraph>
     </Content>
   </TitlePage>
 </FinalDraft>`;
