@@ -1861,6 +1861,33 @@ function updateAuthUI(user,quota){
     }else{q.hidden=true;}
   }
 }
+// Tear down all in-memory project state and route the user back to the project-select screen.
+// Used by: sign-out (via onAuth), "New Project" in the user menu, and deleting the currently-open project.
+function resetToSelectScreen(){
+  if(saveTimer){clearTimeout(saveTimer);saveTimer=null;}
+  suppressSave=true;
+  currentDraftId=null;
+  selectedType=null;
+  selectedFmt=null;
+  S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
+  // Reset discussion rooms — they hold project-specific chat history we shouldn't carry across sessions.
+  if(typeof DISCUSS==='object'&&DISCUSS){for(const k of Object.keys(DISCUSS))DISCUSS[k]=[];}
+  // Reset the select-screen visual state so it looks pristine.
+  document.querySelectorAll('.ptcard').forEach(c=>c.classList.remove('sel'));
+  const row=document.getElementById('fmtRow');
+  if(row){row.style.display='none';row.querySelectorAll('.fpill').forEach(p=>p.remove());}
+  const cta=document.getElementById('ctaBtn');if(cta)cta.classList.remove('ready');
+  const ico=document.getElementById('ctaIco');if(ico)ico.textContent='✦';
+  const hint=document.getElementById('ctaHint');if(hint)hint.textContent='Select a project type above to begin';
+  // Close any open transient UI so the user lands on a calm select screen.
+  document.getElementById('userMenu')?.remove();
+  if(typeof fsEboxId!=='undefined'&&fsEboxId)closeFsEbox();
+  // Switch screens.
+  document.getElementById('scr-app')?.classList.remove('on');
+  document.getElementById('scr-select')?.classList.add('on');
+  suppressSave=false;
+}
+
 window.addEventListener('sc:ready',()=>{
   if(!window.SC?.configured){
     // No config yet — leave the pill saying "Sign in" but show a helpful error in the modal.
@@ -1869,7 +1896,11 @@ window.addEventListener('sc:ready',()=>{
   window.SC.onAuth((user,quota)=>{
     updateAuthUI(user,quota);
     if(user){tryResume(user);refreshDraftsCount();}
-    else{currentDraftId=null;didResume=false;updateDraftsCount(0,false);closeDrafts();}
+    else{
+      didResume=false;
+      closeDrafts();closeAuth();
+      resetToSelectScreen();
+    }
   });
 });
 
@@ -2060,21 +2091,7 @@ async function switchToDraft(id){
 async function startNewProject(){
   await flushSave();
   closeDrafts();
-  suppressSave=true;
-  currentDraftId=null;
-  selectedType=null;
-  selectedFmt=null;
-  S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
-  // Reset select-screen UI
-  document.querySelectorAll('.ptcard').forEach(c=>c.classList.remove('sel'));
-  const row=document.getElementById('fmtRow');
-  if(row){row.style.display='none';row.querySelectorAll('.fpill').forEach(p=>p.remove());}
-  const cta=document.getElementById('ctaBtn');if(cta)cta.classList.remove('ready');
-  const ico=document.getElementById('ctaIco');if(ico)ico.textContent='✦';
-  const hint=document.getElementById('ctaHint');if(hint)hint.textContent='Select a project type above to begin';
-  document.getElementById('scr-app').classList.remove('on');
-  document.getElementById('scr-select').classList.add('on');
-  suppressSave=false;
+  resetToSelectScreen();
 }
 async function renameDraftPrompt(id,oldTitle){
   const t=prompt('Rename project:',oldTitle||'');
@@ -2137,21 +2154,8 @@ async function performDeleteDraft(id,title,row){
     if(wasOpen){
       // Active project was deleted — clear in-memory state and route back to project select
       // so the user doesn't keep editing a phantom draft that would re-create itself.
-      currentDraftId=null;
       try{await window.SC.drafts.setActive(null);}catch{}
-      suppressSave=true;
-      S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
-      selectedType=null;selectedFmt=null;
-      document.getElementById('scr-app')?.classList.remove('on');
-      document.getElementById('scr-select')?.classList.add('on');
-      // Reset select-screen visual state
-      document.querySelectorAll('.ptcard').forEach(c=>c.classList.remove('sel'));
-      const fmtRow=document.getElementById('fmtRow');
-      if(fmtRow){fmtRow.style.display='none';fmtRow.querySelectorAll('.fpill').forEach(p=>p.remove());}
-      const cta=document.getElementById('ctaBtn');if(cta)cta.classList.remove('ready');
-      const ico=document.getElementById('ctaIco');if(ico)ico.textContent='✦';
-      const hint=document.getElementById('ctaHint');if(hint)hint.textContent='Select a project type above to begin';
-      suppressSave=false;
+      resetToSelectScreen();
     }
     setTimeout(()=>refreshDraftsList(),300); // wait for row removal animation
     notify(`Deleted "${title}"`);
