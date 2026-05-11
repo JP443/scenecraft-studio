@@ -449,6 +449,65 @@ select option{background:var(--bg2);}
 .drafts-new:hover{background:var(--gl);box-shadow:0 6px 22px rgba(200,144,30,0.3);}
 .drafts-new:active{transform:scale(0.98);}
 .drafts-empty{text-align:center;padding:1.5rem 1rem;color:var(--mu);font-size:11.5px;line-height:1.6;}
+
+/* ── PRINT (industry-standard screenplay PDF) ──
+   US Letter, 12pt Courier, 1.5" left / 1" other margins.
+   Inch-based indents per WGA / industry convention:
+     Action        page-left = 1.5"  (no extra indent)
+     Dialogue      page-left = 2.5"  (margin-left 1.0")
+     Parenthetical page-left = 3.1"  (margin-left 1.6")
+     Character     page-left = 3.7"  (margin-left 2.2")
+     Transition    right-aligned at 7.5"
+*/
+@page{size:Letter;margin:1in 1in 1in 1.5in;}
+@media print{
+  html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;}
+  .hd,.tool,.sp-toolbar,.spmeta,.notif,.hd-menu-btn,.mobile-nav,.mobile-nav-overlay,
+  .err-banner,.restore-toast,.noscript,.splash,.auth-overlay,.user-pill,.hd-quota,
+  .spempty,.gen-cursor,.spnum,#scr-select,#exportMenu,#userMenu,.verify-banner,
+  .ebox-fs-backdrop,.next-cta,.brow,.tabs,.panel-head,.next-btn,.back-btn{display:none!important;}
+  /* Hide every screen the user isn't currently exporting from */
+  .screen:not(.on),.panel:not(.on){display:none!important;}
+  /* Strip decorative chrome from the page wrapper */
+  .sppage,.sp-editor{
+    background:#fff!important;color:#000!important;
+    box-shadow:none!important;border:0!important;border-radius:0!important;
+    padding:0!important;margin:0!important;
+    font-family:'Courier Prime','Courier New',Courier,monospace!important;
+    font-size:12pt!important;line-height:1.0!important;
+    min-height:0!important;
+  }
+  /* Absolute inch-based indents — override the percentage screen rules */
+  .spsh{
+    text-transform:uppercase;font-weight:700;
+    margin:0 0 12pt 0!important;padding:0!important;
+    page-break-after:avoid;page-break-inside:avoid;
+  }
+  .spac{
+    margin:0 0 12pt 0!important;padding:0!important;
+    orphans:2;widows:2;
+  }
+  .spch{
+    margin:12pt 0 0 0!important;padding:0 0 0 2.2in!important;
+    text-transform:uppercase;font-weight:400;
+    page-break-after:avoid;page-break-inside:avoid;
+  }
+  .sppa{
+    margin:0!important;padding:0 0 0 1.6in!important;
+    color:#000!important;font-style:normal!important;
+    page-break-before:avoid;page-break-after:avoid;
+  }
+  .spdi{
+    margin:0 0 12pt 0!important;padding:0 1.0in 0 1.0in!important;
+    page-break-before:avoid;orphans:2;widows:2;
+  }
+  .sptr{
+    text-align:right;text-transform:uppercase;font-weight:400;
+    margin:12pt 0!important;padding:0!important;
+    page-break-before:avoid;
+  }
+  .spbl{height:12pt!important;}
+}
 </style>
 </head>
 <body>
@@ -556,7 +615,7 @@ select option{background:var(--bg2);}
         <div class="auth-av" id="userAvatar">?</div>
         <span class="auth-label" id="userLabel">Sign in</span>
       </button>
-      <button class="xbtn" onclick="doExport()">↓ Export</button>
+      <button class="xbtn" onclick="doExport(event)">↓ Export</button>
     </div>
   </div>
   <div class="notif" id="notif"></div>
@@ -1125,7 +1184,7 @@ function panel4(cfg){return`<div class="panel" id="p-4"><div class="pg">
     <button class="bg ai-cta" id="polbtn" onclick="runPol()" disabled><span class="spin" id="sp5" style="display:none"></span>Polish</button>
     <button class="bs" onclick="acceptPolish()">✓ Accept Version</button>
     <button class="bs" onclick="copyScript()">📋 Copy</button>
-    <button class="xbtn" onclick="doExport()">↓ Export .txt</button>
+    <button class="xbtn" onclick="doExport(event)">↓ Export</button>
   </div>
   <div id="polOut" style="display:none;margin-top:1.2rem;">
     <div class="compare-grid">
@@ -1144,7 +1203,7 @@ function panel4(cfg){return`<div class="panel" id="p-4"><div class="pg">
     <div class="next-cta-prompt">When it reads the way you hear it in your head, ship it.</div>
     <div class="next-cta-row">
       <button class="bs back-btn" onclick="go(3)">← ${cfg.tabs[3]}</button>
-      <button class="bg next-btn" onclick="doExport()">Export Final Script ↓</button>
+      <button class="bg next-btn" onclick="doExport(event)">Export Final Script ↓</button>
     </div>
   </div>
 </div></div>`;}
@@ -1713,13 +1772,118 @@ function acceptPolish(){
 //  EXPORT
 // ══════════════════════════════
 function copyScript(){navigator.clipboard.writeText(S.script||'No script yet.').then(()=>notify('Copied!'));}
-function doExport(){
+function doExport(ev){
   if(!S.script){notify('Generate a script first!');return;}
-  const blob=new Blob([S.script],{type:'text/plain'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=((S.title||'script').replace(/\s+/g,'-').toLowerCase())+'.txt';
-  a.click();notify('Exported!');
+  const existing=document.getElementById('exportMenu');
+  if(existing){existing.remove();return;}
+  const anchor=ev?.currentTarget||ev?.target||document.querySelector('.xbtn');
+  const r=anchor?.getBoundingClientRect?.()||{bottom:60,right:window.innerWidth-20};
+  const menu=document.createElement('div');
+  menu.id='exportMenu';menu.className='user-menu';
+  menu.style.top=(r.bottom+6)+'px';
+  menu.style.right=(window.innerWidth-r.right)+'px';
+  menu.innerHTML=`
+    <button class="user-menu-item" type="button" onclick="exportPdf()">PDF — industry layout</button>
+    <button class="user-menu-item" type="button" onclick="exportFountain()">Fountain (.fountain)</button>
+    <button class="user-menu-item" type="button" onclick="exportFdx()">Final Draft (.fdx)</button>
+    <button class="user-menu-item" type="button" onclick="exportTxt()">Plain text (.txt)</button>`;
+  document.body.appendChild(menu);
+  setTimeout(()=>document.addEventListener('click',closeExportMenuOnce,{once:true}),0);
+}
+function closeExportMenuOnce(){const m=document.getElementById('exportMenu');if(m)m.remove();}
+function safeFilename(){return(S.title||'script').replace(/[^a-z0-9-]+/gi,'-').toLowerCase().replace(/^-|-$/g,'')||'script';}
+function exportTxt(){
+  closeExportMenuOnce();
+  const blob=new Blob([S.script],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.txt';a.click();
+  URL.revokeObjectURL(a.href);notify('Exported .txt');
+}
+function exportPdf(){
+  closeExportMenuOnce();
+  // Print CSS hides everything except the screenplay preview pane — switch to preview mode first.
+  if(typeof setMode==='function')setMode('preview');
+  setTimeout(()=>{window.print();notify('Print dialog opened — choose "Save as PDF".');},80);
+}
+function exportFdx(){
+  closeExportMenuOnce();
+  const xml=buildFdx(S.script,S.title||'Untitled');
+  const blob=new Blob([xml],{type:'application/xml;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.fdx';a.click();
+  URL.revokeObjectURL(a.href);notify('Exported .fdx');
+}
+function exportFountain(){
+  closeExportMenuOnce();
+  const text=buildFountain(S.script,S.title||'Untitled');
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeFilename()+'.fountain';a.click();
+  URL.revokeObjectURL(a.href);notify('Exported .fountain');
+}
+function buildFountain(script,title){
+  // Fountain spec: https://fountain.io — universal plain-text screenplay format.
+  // Imports into Final Draft, Highland, Slugline, WriterDuet, Fade In, Trelby, KIT Scenarist, Celtx.
+  const author=(window.SC?.getCurrentUser?.()?.displayName)||'SceneCraft Studio';
+  const today=new Date().toISOString().slice(0,10);
+  const header=`Title: ${title}\nCredit: Written by\nAuthor: ${author}\nDraft date: ${today}\n\n`;
+  const lines=(script||'').split(/\r?\n/);
+  const out=[];let prev='';
+  for(const raw of lines){
+    const t=raw.trim();
+    if(!t){if(out.length&&out[out.length-1]!=='')out.push('');prev='';continue;}
+    if(/^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO:|DISSOLVE TO:|SMASH CUT TO:|MATCH CUT TO:|THE END)$/i.test(t)){
+      if(out.length&&out[out.length-1]!=='')out.push('');
+      out.push(t.toUpperCase());out.push('');prev='trans';continue;
+    }
+    if(/^(INT\.|EXT\.|I\/E\.|INT\/EXT\.|EST\.)/i.test(t)){
+      if(out.length&&out[out.length-1]!=='')out.push('');
+      out.push(t.toUpperCase());out.push('');prev='sh';continue;
+    }
+    if(/^[A-Z][A-Z0-9\s'\-(),\.]+$/.test(t)&&t.length<45&&!t.endsWith('TO:')&&t.split(/\s+/).length<=6){
+      if(out.length&&out[out.length-1]!=='')out.push('');
+      out.push(t);prev='char';continue;
+    }
+    if(t.startsWith('(')&&t.endsWith(')')&&(prev==='char'||prev==='dial')){
+      out.push(t);prev='paren';continue;
+    }
+    if(prev==='char'||prev==='dial'||prev==='paren'){
+      out.push(t);prev='dial';continue;
+    }
+    out.push(t);prev='action';
+  }
+  return header+out.join('\n').replace(/\n{3,}/g,'\n\n').trimEnd()+'\n';
+}
+function buildFdx(script,title){
+  // Minimal Final Draft 8+ XML. Element detection mirrors parseSP().
+  const lines=(script||'').split('\n');
+  const paras=[];
+  let inDial=false;
+  for(const t of lines){
+    const tr=t.trim();
+    if(!tr){inDial=false;continue;}
+    let type='Action';
+    if(/^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO:|THE END|ACT ONE|ACT TWO|ACT THREE|END OF ACT|TAG:)$/.test(tr)){type='Transition';inDial=false;}
+    else if(/^(INT\.|EXT\.|I\/E\.|B-ROLL:|SCENE\s\d|SEGMENT\s\d|SHOT\s\d|SOUND:|MUSIC:)/.test(tr)){type='Scene Heading';inDial=false;}
+    else if(tr.startsWith('(')&&tr.endsWith(')')&&inDial){type='Parenthetical';}
+    else if(/^[A-Z][A-Z\s'\-()\.V]+$/.test(tr)&&tr.length<45&&!tr.endsWith('TO:')&&tr.split(' ').length<=6){type='Character';inDial=true;}
+    else if(inDial){type='Dialogue';}
+    else{type='Action';inDial=false;}
+    paras.push(`    <Paragraph Type="${type}"><Text>${esc(tr)}</Text></Paragraph>`);
+  }
+  const author=(window.SC?.getCurrentUser?.()?.displayName)||'SceneCraft Studio';
+  return `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<FinalDraft DocumentType="Script" Template="No" Version="1">
+  <Content>
+${paras.join('\n')}
+  </Content>
+  <TitlePage>
+    <Content>
+      <Paragraph Alignment="Center"><Text>${esc(title)}</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text></Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>Written by</Text></Paragraph>
+      <Paragraph Alignment="Center"><Text></Text></Paragraph>
+      <Paragraph Alignment="Center"><Text>${esc(author)}</Text></Paragraph>
+    </Content>
+  </TitlePage>
+</FinalDraft>`;
 }
 
 // ══════════════════════════════
