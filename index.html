@@ -389,9 +389,18 @@ select option{background:var(--bg2);}
 
 /* ── DRAFTS / PROJECTS ── */
 .drafts-list{max-height:50vh;overflow-y:auto;margin-top:0.4rem;}
-.draft-row{display:flex;align-items:center;gap:0.7rem;padding:0.75rem 0.85rem;border:1px solid var(--br);border-radius:var(--r-md);margin-bottom:0.45rem;cursor:pointer;transition:border-color 200ms var(--ease-out),background-color 200ms var(--ease-out),transform 200ms var(--ease-out);background:rgba(255,255,255,0.025);}
+.draft-row{display:flex;align-items:center;gap:0.7rem;padding:0.75rem 0.85rem;border:1px solid var(--br);border-radius:var(--r-md);margin-bottom:0.45rem;cursor:pointer;transition:border-color 200ms var(--ease-out),background-color 200ms var(--ease-out),transform 320ms var(--ease-out),opacity 240ms var(--ease-out),max-height 360ms var(--ease-out),margin 240ms var(--ease-out),padding 240ms var(--ease-out);background:rgba(255,255,255,0.025);max-height:120px;overflow:hidden;}
 .draft-row:hover{border-color:var(--brg);background:rgba(200,144,30,0.06);transform:translateX(2px);}
 .draft-row.current{border-color:var(--g);background:rgba(200,144,30,0.08);}
+.draft-row.confirming{border-color:rgba(220,80,80,0.4);background:rgba(220,80,80,0.05);}
+.draft-row.confirming:hover{transform:none;border-color:rgba(220,80,80,0.55);background:rgba(220,80,80,0.07);}
+.draft-row.removing{opacity:0;transform:translateX(60px) scale(0.97);max-height:0;margin-bottom:0;padding-top:0;padding-bottom:0;border-top-width:0;border-bottom-width:0;pointer-events:none;}
+.draft-del-btn{display:inline-flex;align-items:center;gap:5px;}
+.draft-del-btn .draft-del-label{display:none;font-size:11px;font-weight:600;letter-spacing:0.03em;}
+.draft-del-btn[data-confirm="1"]{background:#C84030!important;color:#fff!important;padding:5px 11px!important;border-radius:var(--r-sm);}
+.draft-del-btn[data-confirm="1"] .draft-del-label{display:inline;}
+.draft-del-btn[data-confirm="1"] .draft-del-icon{display:none;}
+.draft-del-btn[data-confirm="1"]:hover{background:#D85040!important;}
 .draft-ico{font-size:1.35rem;flex-shrink:0;}
 .draft-meta{flex:1;min-width:0;}
 .draft-title{font-size:13.5px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1980,7 +1989,7 @@ async function openDrafts(){
   o.classList.add('on');
   await refreshDraftsList();
 }
-function closeDrafts(){document.getElementById('draftsOverlay')?.classList.remove('on');}
+function closeDrafts(){_disarmAllDeletes();document.getElementById('draftsOverlay')?.classList.remove('on');}
 async function refreshDraftsList(){
   const listEl=document.getElementById('draftsList');
   const emptyEl=document.getElementById('draftsEmpty');
@@ -1997,15 +2006,20 @@ async function refreshDraftsList(){
     const ttl=esc(d.title||d.state?.title||'Untitled');
     const fmt=esc(d.fmt||cfg.name||'');
     const when=fmtDate(d.updatedAt);
-    return`<div class="draft-row${isCurrent?' current':''}" onclick="switchToDraft('${d.id}')">
+    return`<div class="draft-row${isCurrent?' current':''}" data-id="${d.id}" onclick="onDraftRowClick(event,'${d.id}')">
       <div class="draft-ico">${cfg.ico}</div>
       <div class="draft-meta">
         <div class="draft-title">${ttl}${isCurrent?'<span class="draft-current-badge">Open</span>':''}</div>
         <div class="draft-sub">${fmt}${when?' · '+when:''}</div>
       </div>
       <div class="draft-actions" onclick="event.stopPropagation()">
-        <button type="button" title="Rename" onclick="renameDraftPrompt('${d.id}','${ttl.replace(/'/g,"\\'")}')">✏</button>
-        <button type="button" class="danger" title="Delete" onclick="deleteDraftConfirm('${d.id}','${ttl.replace(/'/g,"\\'")}')">✕</button>
+        <button type="button" title="Rename" aria-label="Rename project" onclick="renameDraftPrompt('${d.id}','${ttl.replace(/'/g,"\\'")}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </button>
+        <button type="button" class="danger draft-del-btn" data-del="${d.id}" title="Delete project" aria-label="Delete project" onclick="armOrConfirmDelete(event,'${d.id}','${ttl.replace(/'/g,"\\'")}')">
+          <svg class="draft-del-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          <span class="draft-del-label">Delete?</span>
+        </button>
       </div>
     </div>`;
   }).join('');
@@ -2076,16 +2090,75 @@ async function renameDraftPrompt(id,oldTitle){
     refreshDraftsList();notify('Renamed');
   }catch{notify('Rename failed');}
 }
-async function deleteDraftConfirm(id,title){
-  if(!confirm(`Delete "${title}"? This can't be undone.`))return;
+// Two-step inline delete — first click arms, second click deletes.
+// Disarms after 3.5s of inactivity or when the user clicks elsewhere.
+const _pendingDelete=new Map();
+function _disarmDelete(id){
+  const btn=document.querySelector(`.draft-del-btn[data-del="${id}"]`);
+  const row=btn?.closest('.draft-row');
+  if(btn){btn.dataset.confirm='';btn.setAttribute('title','Delete project');}
+  if(row)row.classList.remove('confirming');
+  const t=_pendingDelete.get(id);
+  if(t){clearTimeout(t);_pendingDelete.delete(id);}
+}
+function _disarmAllDeletes(){
+  for(const id of Array.from(_pendingDelete.keys()))_disarmDelete(id);
+}
+function armOrConfirmDelete(ev,id,title){
+  ev.stopPropagation();
+  const btn=ev.currentTarget;
+  const row=btn.closest('.draft-row');
+  if(btn.dataset.confirm==='1'){
+    // Second click — actually delete
+    _disarmDelete(id);
+    performDeleteDraft(id,title,row);
+    return;
+  }
+  // First click — disarm any others, then arm this one
+  _disarmAllDeletes();
+  btn.dataset.confirm='1';
+  btn.setAttribute('title','Click again to delete');
+  row?.classList.add('confirming');
+  const t=setTimeout(()=>_disarmDelete(id),3500);
+  _pendingDelete.set(id,t);
+}
+function onDraftRowClick(ev,id){
+  // If this row's delete is armed, clicking anywhere on it disarms instead of switching.
+  if(_pendingDelete.has(id)){_disarmDelete(id);return;}
+  // Clicking a row also disarms any OTHER pending delete on a different row.
+  _disarmAllDeletes();
+  switchToDraft(id);
+}
+async function performDeleteDraft(id,title,row){
+  if(row)row.classList.add('removing');
   try{
     await window.SC.drafts.delete(id);
-    if(id===currentDraftId){
-      // The currently-open draft was deleted: drop in-memory pointer; subsequent edits create a new draft.
+    const wasOpen=(id===currentDraftId);
+    if(wasOpen){
+      // Active project was deleted — clear in-memory state and route back to project select
+      // so the user doesn't keep editing a phantom draft that would re-create itself.
       currentDraftId=null;
+      try{await window.SC.drafts.setActive(null);}catch{}
+      suppressSave=true;
+      S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
+      selectedType=null;selectedFmt=null;
+      document.getElementById('scr-app')?.classList.remove('on');
+      document.getElementById('scr-select')?.classList.add('on');
+      // Reset select-screen visual state
+      document.querySelectorAll('.ptcard').forEach(c=>c.classList.remove('sel'));
+      const fmtRow=document.getElementById('fmtRow');
+      if(fmtRow){fmtRow.style.display='none';fmtRow.querySelectorAll('.fpill').forEach(p=>p.remove());}
+      const cta=document.getElementById('ctaBtn');if(cta)cta.classList.remove('ready');
+      const ico=document.getElementById('ctaIco');if(ico)ico.textContent='✦';
+      const hint=document.getElementById('ctaHint');if(hint)hint.textContent='Select a project type above to begin';
+      suppressSave=false;
     }
-    refreshDraftsList();refreshDraftsCount();notify('Deleted');
-  }catch{notify('Delete failed');}
+    setTimeout(()=>refreshDraftsList(),300); // wait for row removal animation
+    notify(`Deleted "${title}"`);
+  }catch{
+    if(row)row.classList.remove('removing');
+    notify('Delete failed — try again');
+  }
 }
 function restoreFormFields(){
   const set=(id,val)=>{const e=document.getElementById(id);if(e&&val!=null)e.value=val;};
