@@ -26,9 +26,27 @@
 }
 *{-webkit-tap-highlight-color:transparent;}
 @media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  /* Per Emil: reduced motion = fewer/gentler animations, not zero.
+     Kill transforms and movement; keep opacity/color transitions so the
+     UI still has comprehension cues (fades, focus rings, hover tints). */
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-delay:0ms!important;
+    animation-iteration-count:1!important;
+    transition-property:opacity,background-color,border-color,color,box-shadow!important;
+    transition-duration:200ms!important;
+  }
   .gen-cursor{animation:none!important;}
 }
+/* AI Generate buttons gently pulse while streaming so users see the system working. */
+.bg.is-loading{animation:btnPulse 1.8s var(--ease-in-out) infinite;box-shadow:0 0 0 0 rgba(200,144,30,0.55),0 6px 20px rgba(200,144,30,0.28);}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(200,144,30,0.55),0 6px 20px rgba(200,144,30,0.28);}
+  50%{box-shadow:0 0 0 8px rgba(200,144,30,0),0 10px 28px rgba(200,144,30,0.45);}
+}
+/* Idle sparkle on Generate buttons — a 1-pixel hint they do AI work. */
+.bg.ai-cta::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;margin-right:6px;box-shadow:0 0 6px rgba(255,255,255,0.7);animation:aiPing 2.6s var(--ease-in-out) infinite;}
+@keyframes aiPing{0%,55%,100%{opacity:0.85;transform:scale(1);}65%{opacity:0.4;transform:scale(1.4);}80%{opacity:0.85;transform:scale(1);}}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden;}
 
 /* ── SCREENS ── */
@@ -438,7 +456,7 @@ select option{background:var(--bg2);}
       <div class="pt-sub">80–120 page screenplay. 3-act Hollywood structure.</div>
     </button>
     <button class="ptcard" data-type="short" onclick="selType(this)">
-      <div class="pt-check">✓</div><span class="pt-ico">🎞</span>
+      <div class="pt-check">✓</div><span class="pt-ico">🎥</span>
       <div class="pt-name">Short Film</div>
       <div class="pt-sub">Under 40 pages. Festival-ready format.</div>
     </button>
@@ -448,7 +466,7 @@ select option{background:var(--bg2);}
       <div class="pt-sub">Episodic drama or comedy. Pilot or spec script.</div>
     </button>
     <button class="ptcard" data-type="doc" onclick="selType(this)">
-      <div class="pt-check">✓</div><span class="pt-ico">🎙</span>
+      <div class="pt-check">✓</div><span class="pt-ico">🎤</span>
       <div class="pt-name">Documentary</div>
       <div class="pt-sub">Treatment, shooting script, or narration.</div>
     </button>
@@ -585,7 +603,7 @@ const PT = {
     beatLabels:['ACT I','ACT II','ACT III'],beatSubs:['Setup 25%','Confrontation 50%','Resolution 25%'],
     scriptSys:`You are an award-winning Hollywood screenwriter. Write in strict professional screenplay format: FADE IN:, INT./EXT. scene headings ALL CAPS, action lines present tense, character names ALL CAPS centered before dialogue, proper parentheticals, CUT TO: transitions. Make it cinematic and emotionally compelling.`
   },
-  short:{ico:'🎞',name:'Short Film',fmt:['Drama Short','Comedy Short','Experimental','Thriller Short','Horror Short'],
+  short:{ico:'🎥',name:'Short Film',fmt:['Drama Short','Comedy Short','Experimental','Thriller Short','Horror Short'],
     tabs:['Story','Cast','Outline','Script','Polish'],
     structures:['3-Act (Compact)','Single Scene','Vignette','Non-linear'],
     unitLabel:'Scenes',unitSingular:'Scene',sceneNums:[3,5,7,10],defaultScenes:5,
@@ -605,7 +623,7 @@ const PT = {
     beatLabels:['ACT 1','ACT 2','ACT 3','ACT 4'],beatSubs:['Cold Open','Rising','Climax','Tag'],
     scriptSys:`You are a professional TV writer with credits on major network and streaming shows. Write in TV screenplay format: COLD OPEN if applicable, ACT ONE/TWO tags, INT./EXT. slug lines, proper tag scenes. Professional broadcast standard.`
   },
-  doc:{ico:'🎙',name:'Documentary',fmt:['Observational','Interview-Based','Narrated','Cinéma Vérité','Historical'],
+  doc:{ico:'🎤',name:'Documentary',fmt:['Observational','Interview-Based','Narrated','Cinéma Vérité','Historical'],
     tabs:['Concept','Subjects','Structure','Script','Polish'],
     structures:['Narrative Arc','Chronological','Thematic','Interview-Driven','Hybrid'],
     unitLabel:'Segments',unitSingular:'Segment',sceneNums:[5,8,10,12],defaultScenes:8,
@@ -701,7 +719,17 @@ const PT = {
 //  STATE
 // ══════════════════════════════
 let selectedType=null,selectedFmt=null;
-let S={title:'',logline:'',setting:'',themes:'',tone:'',genre:'',extra:{},cast:[],scenes:[],script:''};
+// S holds every piece of user/AI work for the open project. Anything that lives only in the DOM
+// (like the AI Analysis textarea) gets lost on sign-out — so we mirror it here and persist it.
+let S={
+  title:'',logline:'',setting:'',themes:'',tone:'',genre:'',
+  extra:{},cast:[],scenes:[],script:'',
+  aiNotes:'',         // Story tab — AI analysis output (ab1t textarea)
+  aiSuggestions:'',   // Cast tab — AI suggestion output (ab2t textarea, pre-Import)
+  polishType:null,    // Polish tab — which polish tool was selected
+  polishOutput:'',    // Polish tab — polished version (polAfter textarea, pre-Accept)
+  discuss:{story:[],beats:[],script:[]} // Discussion-room chat history per room
+};
 let isGen=false,viewMode='preview',polType=null,editingCharIdx=-1;
 // ── Resume / persistence state ──
 let currentDraftId=null,currentTab=0,saveTimer=null,didResume=false,suppressSave=false;
@@ -863,7 +891,7 @@ function panel0(cfg){return`<div class="panel on" id="p-0"><div class="pg">
     <option>Epic & sweeping</option><option>Playful & comedic</option>
   </select></div>
   <div class="brow">
-    <button class="bg" onclick="devStory()"><span class="spin" id="sp1" style="display:none"></span>✦ Develop with AI</button>
+    <button class="bg ai-cta" id="devStoryBtn" onclick="devStory()"><span class="spin" id="sp1" style="display:none"></span>Develop with AI</button>
     <button class="bs" onclick="go(1)">→ ${cfg.tabs[1]}</button>
     <button class="bs" onclick="go(3)">→ Jump to Script</button>
   </div>
@@ -874,7 +902,7 @@ function panel0(cfg){return`<div class="panel on" id="p-0"><div class="pg">
       <button class="btiny" onclick="go(1)">→ ${cfg.tabs[1]}</button>
       <button class="ebox-expand" onclick="toggleEbox('ab1-wrap')" title="Expand for easier reading">⤢ Expand</button>
     </div>
-    <textarea class="ebox-ta" id="ab1t" placeholder="AI notes will appear here..."></textarea>
+    <textarea class="ebox-ta" id="ab1t" placeholder="AI notes will appear here..." oninput="S.aiNotes=this.value;scheduleSave();"></textarea>
   </div>
   ${discussHTML('story',cfg)}
 </div></div>`;}
@@ -892,7 +920,7 @@ function panel1(cfg){
   <div class="ttl">${cfg.tabs[1]}</div>
   <div class="sub">Add ${cl.toLowerCase()} manually or let AI suggest them. All cards are editable.</div>
   <div class="brow" style="margin-bottom:0.85rem;">
-    <button class="bg" onclick="aiCast()"><span class="spin" id="sp2" style="display:none"></span>✦ AI Suggest ${cl}</button>
+    <button class="bg ai-cta" id="aiCastBtn" onclick="aiCast()"><span class="spin" id="sp2" style="display:none"></span>AI Suggest ${cl}</button>
     <button class="bs" onclick="openCF()">+ Add Manually</button>
   </div>
   <div id="ab2-wrap" class="ebox-wrap" style="display:none;">
@@ -902,7 +930,7 @@ function panel1(cfg){
       <button class="btiny" onclick="parseSuggAndAdd()">+ Import</button>
       <button class="ebox-expand" onclick="toggleEbox('ab2-wrap')" title="Expand for easier reading">⤢ Expand</button>
     </div>
-    <textarea class="ebox-ta" id="ab2t" placeholder="AI suggestions here. Edit, then click Import."></textarea>
+    <textarea class="ebox-ta" id="ab2t" placeholder="AI suggestions here. Edit, then click Import." oninput="S.aiSuggestions=this.value;scheduleSave();"></textarea>
   </div>
   <div class="div"></div>
   <div class="cgrid" id="cGrid"></div>
@@ -944,7 +972,7 @@ function panel2(cfg){
     <div class="f"><span class="lbl">Structure</span><select id="o-s">${cfg.structures.map(s=>`<option>${s}</option>`).join('')}</select></div>
   </div>
   <div class="brow">
-    <button class="bg" onclick="genOutline()"><span class="spin" id="sp3" style="display:none"></span>✦ Generate ${cfg.unitLabel}</button>
+    <button class="bg ai-cta" id="genOutlineBtn" onclick="genOutline()"><span class="spin" id="sp3" style="display:none"></span>Generate ${cfg.unitLabel}</button>
     <button class="bs" onclick="addBlankScene()">+ Add Manually</button>
   </div>
   <div id="ab3-wrap" class="ebox-wrap" style="display:none;">
@@ -974,7 +1002,7 @@ function panel3(cfg){return`<div class="panel script-panel" id="p-3">
       <option>Balanced</option><option>Heavy dialogue</option><option>Action-focused</option>
     </select></div>
     <div class="brow">
-      <button class="bg" id="gsbtn" onclick="genScript()"><span class="spin" id="sp4" style="display:none"></span>✦ Generate</button>
+      <button class="bg ai-cta" id="gsbtn" onclick="genScript()"><span class="spin" id="sp4" style="display:none"></span>Generate</button>
       <button class="bs" onclick="clearSc()">Clear</button>
     </div>
     <div class="div"></div>
@@ -1043,7 +1071,7 @@ function panel4(cfg){return`<div class="panel" id="p-4"><div class="pg">
     <button class="pc" onclick="selPol(this,'director')"><span class="pc-i">🎥</span><div class="pc-n">Director's Notes</div><div class="pc-d">Visual & camera direction</div></button>
   </div>
   <div class="brow">
-    <button class="bg" id="polbtn" onclick="runPol()" disabled><span class="spin" id="sp5" style="display:none"></span>✦ Polish</button>
+    <button class="bg ai-cta" id="polbtn" onclick="runPol()" disabled><span class="spin" id="sp5" style="display:none"></span>Polish</button>
     <button class="bs" onclick="acceptPolish()">✓ Accept Version</button>
     <button class="bs" onclick="copyScript()">📋 Copy</button>
     <button class="xbtn" onclick="doExport()">↓ Export .txt</button>
@@ -1056,7 +1084,7 @@ function panel4(cfg){return`<div class="panel" id="p-4"><div class="pg">
           <button class="ebox-expand" onclick="toggleEbox('polAfterWrap')" style="float:right;margin-top:-2px;" title="Expand for easier reading">⤢ Expand</button>
         </h4>
         <div id="polAfterWrap" class="ebox-wrap" style="margin-top:0;padding:0;background:transparent;border:none;">
-          <textarea class="sp-compare" id="polAfter" style="background:#F9F7F1;border:2px solid rgba(200,144,30,0.3);resize:vertical;min-height:260px;max-height:62vh;font-family:'Courier Prime',monospace;font-size:11pt;line-height:1.7;color:#111;outline:none;padding:1rem 1.1rem;border-radius:var(--r-md);transition:border-color 200ms var(--ease-out);"></textarea>
+          <textarea class="sp-compare" id="polAfter" oninput="S.polishOutput=this.value;scheduleSave();" style="background:#F9F7F1;border:2px solid rgba(200,144,30,0.3);resize:vertical;min-height:260px;max-height:62vh;font-family:'Courier Prime',monospace;font-size:11pt;line-height:1.7;color:#111;outline:none;padding:1rem 1.1rem;border-radius:var(--r-md);transition:border-color 200ms var(--ease-out);"></textarea>
         </div>
       </div>
     </div>
@@ -1291,7 +1319,11 @@ Tone: ${S.tone}
 ${extras}
 
 Cover, in your own voice and order: what's working specifically; what's still abstract and needs sharpening; the one or two things that, if pushed, would make this unmistakable. If the logline is doing the heavy lifting of three different stories, name them. End with a single concrete next move the writer can make today.`;
-  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{hide('sp1');setDot('ab1dot',false);});
+  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{
+    hide('sp1');setDot('ab1dot',false);
+    S.aiNotes=full||t.value||'';
+    scheduleSave();
+  });
 }
 
 // ══════════════════════════════
@@ -1315,7 +1347,11 @@ One per line. Strict format:
 NAME — Role — One vivid sentence of who they are (a behavior, a contradiction, a way they move through rooms) — Arc: what they want vs. what they need, and how that collides with the story
 
 Avoid: "complicated relationship with...", "haunted by his past", "torn between two worlds", and other catalogue phrases. Use the actual setting and themes above. Each one should feel like a person you'd recognize on the street, not a deck slide.`;
-  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{hide('sp2');setDot('ab2dot',false);});
+  await stream(sys,p,(c,full)=>{t.value=full;},(full)=>{
+    hide('sp2');setDot('ab2dot',false);
+    S.aiSuggestions=full||t.value||'';
+    scheduleSave();
+  });
 }
 
 function parseSuggAndAdd(){
@@ -1599,6 +1635,9 @@ async function runPol(){
   const sys=`You are a senior script doctor. You make surgical changes: never rewrite past what was asked, never add new plot, never inflate scenes. Preserve the writer's voice. Return ONLY the polished script — no preamble, no "here is your polished version", no commentary.\n${HUMAN_VOICE}`;
   await stream(sys,`${inst[polType]}\n\nSCRIPT:\n${sample}`,(c,full)=>{af.value=full;},(full)=>{
     hide('sp5');document.getElementById('polbtn').disabled=false;
+    S.polishType=polType;
+    S.polishOutput=full||af.value||'';
+    scheduleSave();
   });
 }
 function acceptPolish(){
@@ -1628,8 +1667,17 @@ function doExport(){
 // ══════════════════════════════
 //  UTILS
 // ══════════════════════════════
-function show(id){const e=document.getElementById(id);if(e)e.style.display='inline-block';}
-function hide(id){const e=document.getElementById(id);if(e)e.style.display='none';}
+function show(id){
+  const e=document.getElementById(id);if(!e)return;
+  e.style.display='inline-block';
+  // Mirror the loading state on the parent generate button so it can pulse.
+  e.closest('.bg')?.classList.add('is-loading');
+}
+function hide(id){
+  const e=document.getElementById(id);if(!e)return;
+  e.style.display='none';
+  e.closest('.bg')?.classList.remove('is-loading');
+}
 function notify(msg){const n=document.getElementById('notif');if(!n)return;n.textContent=msg;n.classList.add('on');setTimeout(()=>n.classList.remove('on'),2800);}
 function setDot(id,anim){const d=document.getElementById(id);if(d)d.classList.toggle('anim',anim);}
 
@@ -1683,6 +1731,9 @@ function toggleDiscuss(roomId){
   if(!wasOpen&&DISCUSS[roomId].length===0){
     pushDiscussMsg(roomId,'ai',DISCUSS_KICKOFF[roomId]);
     DISCUSS[roomId].push({role:'assistant',content:DISCUSS_KICKOFF[roomId]});
+    // Persist so the kickoff doesn't repeat after a sign-out/refresh.
+    S.discuss={story:DISCUSS.story.slice(),beats:DISCUSS.beats.slice(),script:DISCUSS.script.slice()};
+    scheduleSave();
   }
   if(!wasOpen){
     setTimeout(()=>{
@@ -1747,6 +1798,10 @@ async function sendDiscuss(roomId){
   if(!txt)return;
   pushDiscussMsg(roomId,'you',txt);
   DISCUSS[roomId].push({role:'user',content:txt});
+  // Save the user message immediately so even an interrupted AI reply leaves
+  // the human side of the conversation intact across sessions.
+  S.discuss={story:DISCUSS.story.slice(),beats:DISCUSS.beats.slice(),script:DISCUSS.script.slice()};
+  scheduleSave();
   input.value='';autoGrow(input);
   btn.disabled=true;
   const aiEl=pushDiscussMsg(roomId,'ai','',{streaming:true});
@@ -1763,6 +1818,9 @@ async function sendDiscuss(roomId){
   },(full)=>{
     if(aiEl){aiEl.classList.remove('streaming');aiEl.innerHTML=`<div class="dmsg-tag">AI Collaborator</div>`+esc(full||acc).replace(/\n/g,'<br>');}
     if((full||acc).trim())DISCUSS[roomId].push({role:'assistant',content:full||acc});
+    // Persist the updated room so the conversation survives sign-out / refresh.
+    S.discuss={story:DISCUSS.story.slice(),beats:DISCUSS.beats.slice(),script:DISCUSS.script.slice()};
+    scheduleSave();
     btn.disabled=false;
     input.focus();
   });
@@ -1908,6 +1966,10 @@ window.addEventListener('sc:ready',()=>{
 //  RESUME / PERSISTENCE
 // ══════════════════════════════
 function buildPayload(){
+  // Mirror the discussion-room state onto S so its persisted with everything else.
+  if(typeof DISCUSS==='object'&&DISCUSS){
+    S.discuss={story:DISCUSS.story||[],beats:DISCUSS.beats||[],script:DISCUSS.script||[]};
+  }
   return{
     type:selectedType,
     fmt:selectedFmt,
@@ -1919,7 +1981,12 @@ function buildPayload(){
       extra:S.extra||{},
       cast:Array.isArray(S.cast)?S.cast:[],
       scenes:Array.isArray(S.scenes)?S.scenes:[],
-      script:S.script||''
+      script:S.script||'',
+      aiNotes:S.aiNotes||'',
+      aiSuggestions:S.aiSuggestions||'',
+      polishType:S.polishType||null,
+      polishOutput:S.polishOutput||'',
+      discuss:S.discuss||{story:[],beats:[],script:[]}
     }
   };
 }
@@ -1954,6 +2021,31 @@ async function tryResume(user){
   didResume=true;
   await resumeActiveDraft();
 }
+// Pull a draft document's persisted state back into the in-memory S + DISCUSS objects.
+// Used by both resumeActiveDraft (auto-resume on sign-in) and switchToDraft (manual project pick).
+function _hydrateStateFromDraft(d){
+  const ds=d.state||{};
+  S={
+    title:ds.title||'',logline:ds.logline||'',setting:ds.setting||'',
+    themes:ds.themes||'',tone:ds.tone||'',genre:ds.genre||'',
+    extra:ds.extra||{},
+    cast:Array.isArray(ds.cast)?ds.cast:[],
+    scenes:Array.isArray(ds.scenes)?ds.scenes:[],
+    script:ds.script||'',
+    aiNotes:ds.aiNotes||'',
+    aiSuggestions:ds.aiSuggestions||'',
+    polishType:ds.polishType||null,
+    polishOutput:ds.polishOutput||'',
+    discuss:ds.discuss||{story:[],beats:[],script:[]}
+  };
+  // Mirror the discussion arrays onto the live DISCUSS object the chat UI reads from.
+  if(typeof DISCUSS==='object'&&DISCUSS){
+    DISCUSS.story=Array.isArray(S.discuss?.story)?S.discuss.story.slice():[];
+    DISCUSS.beats=Array.isArray(S.discuss?.beats)?S.discuss.beats.slice():[];
+    DISCUSS.script=Array.isArray(S.discuss?.script)?S.discuss.script.slice():[];
+  }
+}
+
 async function resumeActiveDraft(){
   if(!window.SC?.getCurrentUser())return false;
   let id;
@@ -1966,15 +2058,7 @@ async function resumeActiveDraft(){
   currentDraftId=id;
   selectedType=d.type;
   selectedFmt=d.fmt||null;
-  const ds=d.state||{};
-  S={
-    title:ds.title||'',logline:ds.logline||'',setting:ds.setting||'',
-    themes:ds.themes||'',tone:ds.tone||'',genre:ds.genre||'',
-    extra:ds.extra||{},
-    cast:Array.isArray(ds.cast)?ds.cast:[],
-    scenes:Array.isArray(ds.scenes)?ds.scenes:[],
-    script:ds.script||''
-  };
+  _hydrateStateFromDraft(d);
   buildApp();
   restoreFormFields();
   document.getElementById('scr-select').classList.remove('on');
@@ -2069,15 +2153,7 @@ async function switchToDraft(id){
   currentDraftId=id;
   selectedType=d.type;
   selectedFmt=d.fmt||null;
-  const ds=d.state||{};
-  S={
-    title:ds.title||'',logline:ds.logline||'',setting:ds.setting||'',
-    themes:ds.themes||'',tone:ds.tone||'',genre:ds.genre||'',
-    extra:ds.extra||{},
-    cast:Array.isArray(ds.cast)?ds.cast:[],
-    scenes:Array.isArray(ds.scenes)?ds.scenes:[],
-    script:ds.script||''
-  };
+  _hydrateStateFromDraft(d);
   try{await window.SC.drafts.setActive(id);}catch{}
   buildApp();
   restoreFormFields();
@@ -2177,6 +2253,47 @@ function restoreFormFields(){
     cfg.extraFields.forEach(f=>set('ef-'+f.id,S.extra?.[f.id]));
   }
   renderCast();renderSceneList();renderSceneNav();renderSP();updateStats();
+
+  // Restore AI Analysis (Story tab)
+  if(S.aiNotes){
+    const w=document.getElementById('ab1-wrap'),t=document.getElementById('ab1t');
+    if(t)t.value=S.aiNotes;
+    if(w)w.style.display='block';
+  }
+  // Restore AI Cast Suggestions (Cast tab) — even if not imported yet
+  if(S.aiSuggestions){
+    const w=document.getElementById('ab2-wrap'),t=document.getElementById('ab2t');
+    if(t)t.value=S.aiSuggestions;
+    if(w)w.style.display='block';
+  }
+  // Restore Polish output (Polish tab) — including which polish type was active
+  if(S.polishOutput){
+    const po=document.getElementById('polOut'),ba=document.getElementById('polBefore'),af=document.getElementById('polAfter');
+    if(po)po.style.display='block';
+    if(ba)ba.textContent=(S.script||'No script yet.').substring(0,2500);
+    if(af)af.value=S.polishOutput;
+  }
+  if(S.polishType){
+    polType=S.polishType;
+    const btn=document.querySelector(`.pc[onclick*="'${S.polishType}'"]`);
+    if(btn){btn.classList.add('sel');const pb=document.getElementById('polbtn');if(pb)pb.disabled=false;}
+  }
+  // Restore Discussion-room threads so the user sees their prior conversation
+  ['story','beats','script'].forEach(roomId=>{
+    const msgs=DISCUSS[roomId];if(!msgs||!msgs.length)return;
+    const th=document.getElementById('dthread-'+roomId);if(!th)return;
+    th.innerHTML='';
+    for(const m of msgs){
+      const who=m.role==='user'?'you':'ai';
+      const el=document.createElement('div');
+      el.className='dmsg '+who;
+      el.innerHTML=`<div class="dmsg-tag">${who==='ai'?'AI Collaborator':'You'}</div>`+esc(m.content||'').replace(/\n/g,'<br>');
+      th.appendChild(el);
+    }
+    // Quietly mark the room as open so the user sees their history without re-clicking.
+    const w=document.getElementById('discuss-'+roomId);
+    if(w)w.classList.add('open');
+  });
 }
 // Close modals on Escape, click outside.
 document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){if(fsEboxId){closeFsEbox();return;}closeAuth();closeDrafts();}});
