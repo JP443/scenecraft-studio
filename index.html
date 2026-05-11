@@ -451,7 +451,12 @@ select option{background:var(--bg2);}
 .drafts-empty{text-align:center;padding:1.5rem 1rem;color:var(--mu);font-size:11.5px;line-height:1.6;}
 
 /* ── PRINT (industry-standard screenplay PDF) ──
-   US Letter, 12pt Courier, 1.5" left / 1" other margins.
+   When the user picks Export → PDF, exportPdf() injects a #printRoot
+   container with ONLY the parsed screenplay, then calls window.print().
+   This CSS hides everything else in <body> so the printout never includes
+   tabs, polish cards, headers, banners, or any other app chrome.
+
+   Layout: US Letter, 12pt Courier, 1.5" left / 1" other margins.
    Inch-based indents per WGA / industry convention:
      Action        page-left = 1.5"  (no extra indent)
      Dialogue      page-left = 2.5"  (margin-left 1.0")
@@ -459,54 +464,50 @@ select option{background:var(--bg2);}
      Character     page-left = 3.7"  (margin-left 2.2")
      Transition    right-aligned at 7.5"
 */
+#printRoot{display:none;}
 @page{size:Letter;margin:1in 1in 1in 1.5in;}
 @media print{
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;}
-  .hd,.tool,.sp-toolbar,.spmeta,.notif,.hd-menu-btn,.mobile-nav,.mobile-nav-overlay,
-  .err-banner,.restore-toast,.noscript,.splash,.auth-overlay,.user-pill,.hd-quota,
-  .spempty,.gen-cursor,.spnum,#scr-select,#exportMenu,#userMenu,.verify-banner,
-  .ebox-fs-backdrop,.next-cta,.brow,.tabs,.panel-head,.next-btn,.back-btn{display:none!important;}
-  /* Hide every screen the user isn't currently exporting from */
-  .screen:not(.on),.panel:not(.on){display:none!important;}
-  /* Strip decorative chrome from the page wrapper */
-  .sppage,.sp-editor{
+  /* Hide every direct child of <body>, then re-show ONLY the print container */
+  body>*{display:none!important;}
+  body>#printRoot{display:block!important;margin:0!important;padding:0!important;background:#fff!important;}
+  #printRoot .sppage{
     background:#fff!important;color:#000!important;
     box-shadow:none!important;border:0!important;border-radius:0!important;
     padding:0!important;margin:0!important;
     font-family:'Courier Prime','Courier New',Courier,monospace!important;
     font-size:12pt!important;line-height:1.0!important;
-    min-height:0!important;
+    min-height:0!important;position:static!important;
   }
-  /* Absolute inch-based indents — override the percentage screen rules */
-  .spsh{
+  #printRoot .spsh{
     text-transform:uppercase;font-weight:700;
     margin:0 0 12pt 0!important;padding:0!important;
     page-break-after:avoid;page-break-inside:avoid;
   }
-  .spac{
+  #printRoot .spac{
     margin:0 0 12pt 0!important;padding:0!important;
     orphans:2;widows:2;
   }
-  .spch{
+  #printRoot .spch{
     margin:12pt 0 0 0!important;padding:0 0 0 2.2in!important;
     text-transform:uppercase;font-weight:400;
     page-break-after:avoid;page-break-inside:avoid;
   }
-  .sppa{
+  #printRoot .sppa{
     margin:0!important;padding:0 0 0 1.6in!important;
     color:#000!important;font-style:normal!important;
     page-break-before:avoid;page-break-after:avoid;
   }
-  .spdi{
+  #printRoot .spdi{
     margin:0 0 12pt 0!important;padding:0 1.0in 0 1.0in!important;
     page-break-before:avoid;orphans:2;widows:2;
   }
-  .sptr{
+  #printRoot .sptr{
     text-align:right;text-transform:uppercase;font-weight:400;
     margin:12pt 0!important;padding:0!important;
     page-break-before:avoid;
   }
-  .spbl{height:12pt!important;}
+  #printRoot .spbl{height:12pt!important;}
 }
 </style>
 </head>
@@ -1800,9 +1801,20 @@ function exportTxt(){
 }
 function exportPdf(){
   closeExportMenuOnce();
-  // Print CSS hides everything except the screenplay preview pane — switch to preview mode first.
-  if(typeof setMode==='function')setMode('preview');
-  setTimeout(()=>{window.print();notify('Print dialog opened — choose "Save as PDF".');},80);
+  if(!S.script||!S.script.trim()){notify('Generate a script first!');return;}
+  // Build a dedicated print container — renders ONLY the screenplay,
+  // independent of whichever tab the user is viewing (Script, Polish, etc).
+  document.getElementById('printRoot')?.remove();
+  const root=document.createElement('div');root.id='printRoot';
+  const page=document.createElement('div');page.className='sppage print-page';
+  page.innerHTML=parseSP(S.script);
+  root.appendChild(page);
+  document.body.appendChild(root);
+  setTimeout(()=>{
+    window.print();
+    notify('Save as PDF — uncheck "Headers and footers" for a clean page.');
+    setTimeout(()=>document.getElementById('printRoot')?.remove(),1200);
+  },80);
 }
 function exportFdx(){
   closeExportMenuOnce();
