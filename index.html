@@ -388,14 +388,6 @@ select option{background:var(--bg2);}
 .hd-quota[hidden]{display:none;}
 
 /* ── DRAFTS / PROJECTS ── */
-.drafts-btn{background:rgba(255,255,255,0.04);border:1px solid var(--br);color:var(--su);padding:5px 11px;border-radius:18px;font-size:11.5px;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color 180ms var(--ease-out),color 180ms var(--ease-out),background-color 180ms var(--ease-out),transform 160ms var(--ease-out);}
-.drafts-btn[hidden]{display:none;}
-.drafts-btn:hover{border-color:var(--brg);color:var(--g);background:rgba(200,144,30,0.04);}
-.drafts-btn:active{transform:scale(0.96);}
-.drafts-btn .dcount{font-size:10px;background:rgba(200,144,30,0.12);color:var(--g);border:1px solid var(--brg);padding:0 5px;border-radius:9px;min-width:16px;height:14px;display:inline-flex;align-items:center;justify-content:center;}
-.drafts-btn .dcount[hidden]{display:none;}
-.drafts-btn-sel{position:absolute;top:1.2rem;right:7.5rem;}
-
 .drafts-list{max-height:50vh;overflow-y:auto;margin-top:0.4rem;}
 .draft-row{display:flex;align-items:center;gap:0.7rem;padding:0.75rem 0.85rem;border:1px solid var(--br);border-radius:var(--r-md);margin-bottom:0.45rem;cursor:pointer;transition:border-color 200ms var(--ease-out),background-color 200ms var(--ease-out),transform 200ms var(--ease-out);background:rgba(255,255,255,0.025);}
 .draft-row:hover{border-color:var(--brg);background:rgba(200,144,30,0.06);transform:translateX(2px);}
@@ -421,9 +413,6 @@ select option{background:var(--bg2);}
      PROJECT SELECT
 ══════════════════════════════ -->
 <div class="screen on" id="scr-select">
-<button class="drafts-btn drafts-btn-sel" id="draftsBtnSel" onclick="openDrafts()" type="button" hidden>
-  📁 Drafts <span class="dcount" id="draftsCountSel" hidden>0</span>
-</button>
 <button class="auth-pill auth-pill-sel" id="userPillSel" onclick="onUserPillClick()" type="button">
   <div class="auth-av" id="userAvatarSel">?</div>
   <span class="auth-label" id="userLabelSel">Sign in</span>
@@ -519,9 +508,6 @@ select option{background:var(--bg2);}
     <div class="hd-r">
       <div class="hd-stat" id="hdStat"></div>
       <span class="hd-quota" id="hdQuota" hidden></span>
-      <button class="drafts-btn" id="draftsBtn" onclick="openDrafts()" type="button" hidden>
-        📁 Drafts <span class="dcount" id="draftsCount" hidden>0</span>
-      </button>
       <button class="auth-pill" id="userPill" onclick="onUserPillClick()" type="button">
         <div class="auth-av" id="userAvatar">?</div>
         <span class="auth-label" id="userLabel">Sign in</span>
@@ -746,19 +732,22 @@ function selType(btn){
 function startApp(){
   if(!selectedType)return;
   buildApp();
+  // If the user is continuing an existing draft (e.g. came here via "Change project type"),
+  // their form state lives in S — restore it into the freshly-built inputs.
+  // Only "New Project" should ever blank S and clear currentDraftId.
+  if(currentDraftId||S.title||S.logline||S.script||S.cast.length||S.scenes.length){
+    restoreFormFields();
+  }
   document.getElementById('scr-select').classList.remove('on');
   document.getElementById('scr-app').classList.add('on');
-  // A user clicking through select → "Start Writing" is starting fresh.
-  // Save kicks off draft creation if signed in (stays local otherwise).
   scheduleSave();
 }
 
 function goSelect(){
   document.getElementById('scr-app').classList.remove('on');
   document.getElementById('scr-select').classList.add('on');
-  // Picking a different project type creates a new active draft on next save,
-  // so reset the draft pointer; the prior draft remains in the user's drafts list.
-  currentDraftId=null;
+  // Keep currentDraftId — changing project type updates the SAME draft.
+  // Use "New Project" from the user menu to create a fresh one.
 }
 
 // ══════════════════════════════
@@ -2021,22 +2010,10 @@ async function refreshDraftsList(){
     </div>`;
   }).join('');
 }
-async function refreshDraftsCount(){
-  if(!window.SC?.getCurrentUser()){updateDraftsCount(0,false);return;}
-  try{const list=await window.SC.drafts.list();updateDraftsCount(list.length,true);}
-  catch{updateDraftsCount(0,false);}
-}
-function updateDraftsCount(n,visible=true){
-  for(const btnId of['draftsBtn','draftsBtnSel']){
-    const btn=document.getElementById(btnId);
-    if(btn)btn.hidden=!visible;
-  }
-  for(const cId of['draftsCount','draftsCountSel']){
-    const c=document.getElementById(cId);
-    if(!c)continue;
-    if(n>0){c.textContent=n;c.hidden=false;}else{c.hidden=true;}
-  }
-}
+// The header "Drafts" button was retired in favor of the user-menu's "My projects" item,
+// so these helpers no longer need to fetch or update any badge state.
+function refreshDraftsCount(){/* no-op — kept for callsite compatibility */}
+function updateDraftsCount(){/* no-op — kept for callsite compatibility */}
 async function switchToDraft(id){
   if(id===currentDraftId){closeDrafts();return;}
   await flushSave();
