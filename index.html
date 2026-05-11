@@ -290,6 +290,17 @@ select option{background:var(--bg2);}
 .footer a{color:var(--g);text-decoration:none;transition:color 180ms var(--ease-out);}
 .footer a:hover{color:var(--gl);}
 
+/* ── NEXT-PAGE PROMPT (appears at the bottom of each step) ── */
+.next-cta{margin-top:2.2rem;padding:1.4rem 1.5rem 1.5rem;border:1px solid var(--brg);border-radius:var(--r-lg);background:linear-gradient(180deg,rgba(200,144,30,0.05) 0%,rgba(200,144,30,0.02) 100%);text-align:center;animation:eboxIn 360ms var(--ease-out);}
+.next-cta-prompt{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--tx);margin-bottom:0.95rem;line-height:1.45;letter-spacing:0.005em;}
+.next-cta-row{display:flex;gap:0.65rem;justify-content:center;flex-wrap:wrap;align-items:center;}
+.next-cta .next-btn{padding:0.75rem 1.6rem;font-size:13.5px;font-weight:700;letter-spacing:0.02em;box-shadow:0 6px 22px rgba(200,144,30,0.22);}
+.next-cta .next-btn:hover{box-shadow:0 10px 30px rgba(200,144,30,0.34);}
+.next-cta .back-btn{padding:0.7rem 1.15rem;}
+.next-cta-compact{margin-top:1.1rem;padding:0.95rem 1rem 1.05rem;}
+.next-cta-compact .next-cta-prompt{font-size:0.95rem;margin-bottom:0.65rem;}
+.next-cta-compact .next-btn{padding:0.55rem 1.1rem;font-size:12px;}
+
 /* ── DISCUSSION PANEL ── */
 .discuss-wrap{margin-top:0.9rem;border:1px solid var(--br);border-radius:var(--r-md);background:rgba(255,255,255,0.02);overflow:hidden;animation:eboxIn 320ms var(--ease-out);}
 .discuss-head{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 0.85rem;background:rgba(200,144,30,0.04);border-bottom:1px solid var(--br);cursor:pointer;transition:background-color 180ms var(--ease-out);}
@@ -305,6 +316,12 @@ select option{background:var(--bg2);}
 .dmsg.ai{background:rgba(200,144,30,0.06);border:1px solid var(--brg);color:#D8CFB4;align-self:flex-start;}
 .dmsg.you{background:rgba(255,255,255,0.045);border:1px solid var(--br);color:var(--tx);align-self:flex-end;border-bottom-right-radius:3px;}
 .dmsg.ai.streaming::after{content:'';display:inline-block;width:6px;height:1.1em;vertical-align:-2px;background:var(--g);margin-left:2px;animation:cblink 0.7s step-end infinite;}
+.dmsg.discuss-typing{padding-top:0.45rem;padding-bottom:0.55rem;}
+.dot-typing{display:inline-flex;gap:5px;align-items:center;height:14px;}
+.dot-typing span{width:6px;height:6px;border-radius:50%;background:var(--g);opacity:0.35;animation:dotBounce 1.3s var(--ease-in-out) infinite;}
+.dot-typing span:nth-child(2){animation-delay:0.18s;}
+.dot-typing span:nth-child(3){animation-delay:0.36s;}
+@keyframes dotBounce{0%,80%,100%{opacity:0.3;transform:translateY(0);}40%{opacity:1;transform:translateY(-3px);}}
 .dmsg-tag{font-size:8.5px;text-transform:uppercase;letter-spacing:0.12em;color:var(--mu);margin-bottom:3px;font-weight:600;}
 .dmsg.ai .dmsg-tag{color:var(--g);}
 .discuss-empty{font-size:12px;color:var(--mu);line-height:1.6;text-align:center;padding:0.8rem 0.5rem 0.4rem;}
@@ -736,10 +753,31 @@ let currentDraftId=null,currentTab=0,saveTimer=null,didResume=false,suppressSave
 // ── Discussion threads (per-room conversation memory) ──
 const DISCUSS={story:[],beats:[],script:[]};
 const DISCUSS_TITLE={story:'Story Room — talk it through with your collaborator',beats:'Beat Room — pressure-test your structure',script:'Script Room — push back, ask, refine'};
+// Kickoff arrives as a sequence of short messages, not one wall of text.
+// The chat animates each one in with a typing pause between — feels like the
+// AI is actually thinking, not dumping a prepared list.
 const DISCUSS_KICKOFF={
-  story:'Before we go deeper, I want to make sure we are building the right story. A few questions:\n\n1. What does your protagonist want on the surface — and what do they actually need, even if they can\'t see it yet?\n2. What\'s the wound or contradiction at the center of them? What part of themselves are they running from?\n3. By the end, what does the audience walk out feeling — and what truth about life do you want them to carry?\n\nAnswer one, two, or all three. Or push back. I\'m here to think with you, not at you.',
-  beats:'Your beat sheet is a skeleton — let\'s find the load-bearing bones. A few things to pressure-test:\n\n1. Which beat is the point of no return for your protagonist? If they could still walk away after that moment, the beat isn\'t doing its job yet.\n2. Where in this outline does the audience\'s assumption flip? Every good story has a moment where what we thought was true breaks.\n3. Is there a scene you\'re afraid to write? That\'s probably the one the story needs most.\n\nTell me what\'s nagging you — I\'ll dig in with you.',
-  script:'You\'ve got pages now. Let me read with you, not at you. Tell me:\n\n• A scene you love but can\'t explain why\n• A scene you wrote because you "had to" — those are usually the first ones to cut or transform\n• A line of dialogue that feels off but you can\'t fix\n\nOr ask me anything — pacing, a character\'s voice, whether a moment is earning what it\'s asking for. I\'m here.'
+  story:[
+    "Before we go deeper, I want to make sure we're building the right story.",
+    "What does your protagonist want on the surface — and what do they actually *need*, even if they can't see it yet?",
+    "What's the wound at the center of them? The thing they're running from?",
+    "By the end, what should the audience walk out feeling — and what truth about life do you want them to carry?",
+    "Pick one. Or push back. I'm here to think with you, not at you."
+  ],
+  beats:[
+    "Your beat sheet is a skeleton — let's find the load-bearing bones.",
+    "Which beat is the point of no return for your protagonist? If they could still walk away after that moment, it's not pulling weight yet.",
+    "Where in this outline does the audience's assumption flip? Every good story has a moment where what we thought was true breaks.",
+    "Is there a scene you're afraid to write? That's usually the one the story needs most.",
+    "Tell me what's nagging you — I'll dig in with you."
+  ],
+  script:[
+    "You've got pages now. Let me read with you, not at you.",
+    "Tell me about a scene you love but can't explain why.",
+    "Or a scene you wrote because you 'had to' — those are usually the first ones to cut.",
+    "Or a line of dialogue that feels off but you can't fix.",
+    "Or ask me anything — pacing, a character's voice, whether a moment is earning what it's asking for."
+  ]
 };
 let fsEboxId=null;
 
@@ -892,19 +930,23 @@ function panel0(cfg){return`<div class="panel on" id="p-0"><div class="pg">
   </select></div>
   <div class="brow">
     <button class="bg ai-cta" id="devStoryBtn" onclick="devStory()"><span class="spin" id="sp1" style="display:none"></span>Develop with AI</button>
-    <button class="bs" onclick="go(1)">→ ${cfg.tabs[1]}</button>
-    <button class="bs" onclick="go(3)">→ Jump to Script</button>
   </div>
   <div id="ab1-wrap" class="ebox-wrap" style="display:none;">
     <div class="ebox-bar">
       <span class="ebox-lbl"><div class="edot" id="ab1dot"></div>AI Analysis <span class="edit-tag">✏ editable</span></span>
       <button class="btiny" onclick="devStory()">Regen</button>
-      <button class="btiny" onclick="go(1)">→ ${cfg.tabs[1]}</button>
       <button class="ebox-expand" onclick="toggleEbox('ab1-wrap')" title="Expand for easier reading">⤢ Expand</button>
     </div>
     <textarea class="ebox-ta" id="ab1t" placeholder="AI notes will appear here..." oninput="S.aiNotes=this.value;scheduleSave();"></textarea>
   </div>
   ${discussHTML('story',cfg)}
+  <div class="next-cta">
+    <div class="next-cta-prompt">Got your bearings? Next, build the people in your story.</div>
+    <div class="next-cta-row">
+      <button class="bg next-btn" onclick="go(1)">Continue to ${cfg.tabs[1]} →</button>
+      <button class="bs" onclick="go(3)">Skip to Script →</button>
+    </div>
+  </div>
 </div></div>`;}
 
 function castRoleOpts(){
@@ -945,9 +987,12 @@ function panel1(cfg){
     </div>
     <div class="brow"><button class="bg" id="cfSaveBtn" onclick="addChar()">Add</button><button class="bs" onclick="closeCF()">Cancel</button></div>
   </div>
-  <div class="brow" style="margin-top:1.1rem;">
-    <button class="bs" onclick="go(0)">← ${cfg.tabs[0]}</button>
-    <button class="bg" onclick="go(2)">→ ${cfg.tabs[2]}</button>
+  <div class="next-cta">
+    <div class="next-cta-prompt">Your people are in place. Time to map out what happens to them.</div>
+    <div class="next-cta-row">
+      <button class="bs back-btn" onclick="go(0)">← ${cfg.tabs[0]}</button>
+      <button class="bg next-btn" onclick="go(2)">Continue to ${cfg.tabs[2]} →</button>
+    </div>
   </div>
 </div></div>`;}
 
@@ -984,9 +1029,12 @@ function panel2(cfg){
   </div>
   <div id="slist" style="margin-top:0.9rem;"></div>
   ${discussHTML('beats',cfg)}
-  <div class="brow" style="margin-top:0.8rem;">
-    <button class="bs" onclick="go(1)">← ${cfg.tabs[1]}</button>
-    <button class="bg" onclick="go(3)">→ ${cfg.tabs[3]}</button>
+  <div class="next-cta">
+    <div class="next-cta-prompt">Beats locked. Let's turn them into pages.</div>
+    <div class="next-cta-row">
+      <button class="bs back-btn" onclick="go(1)">← ${cfg.tabs[1]}</button>
+      <button class="bg next-btn" onclick="go(3)">Continue to ${cfg.tabs[3]} →</button>
+    </div>
   </div>
 </div></div>`;}
 
@@ -1016,11 +1064,14 @@ function panel3(cfg){return`<div class="panel script-panel" id="p-3">
       <div class="stat"><div class="stat-n" id="st-sc">0</div><div class="stat-l">${cfg.unitLabel}</div></div>
       <div class="stat"><div class="stat-n" id="st-rt">0m</div><div class="stat-l">Runtime</div></div>
     </div>
-    <div class="brow" style="margin-top:0.85rem;">
-      <button class="bs" onclick="go(2)">← ${cfg.tabs[2]}</button>
-      <button class="bg" onclick="go(4)">→ ${cfg.tabs[4]}</button>
-    </div>
     ${discussHTML('script',cfg)}
+    <div class="next-cta next-cta-compact">
+      <div class="next-cta-prompt">Pages feeling solid? Sharpen them in Polish.</div>
+      <div class="next-cta-row">
+        <button class="bs back-btn" onclick="go(2)">← ${cfg.tabs[2]}</button>
+        <button class="bg next-btn" onclick="go(4)">Continue to ${cfg.tabs[4]} →</button>
+      </div>
+    </div>
   </div>
   <div class="preview">
     <div class="spwrap">
@@ -1087,6 +1138,13 @@ function panel4(cfg){return`<div class="panel" id="p-4"><div class="pg">
           <textarea class="sp-compare" id="polAfter" oninput="S.polishOutput=this.value;scheduleSave();" style="background:#F9F7F1;border:2px solid rgba(200,144,30,0.3);resize:vertical;min-height:260px;max-height:62vh;font-family:'Courier Prime',monospace;font-size:11pt;line-height:1.7;color:#111;outline:none;padding:1rem 1.1rem;border-radius:var(--r-md);transition:border-color 200ms var(--ease-out);"></textarea>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="next-cta">
+    <div class="next-cta-prompt">When it reads the way you hear it in your head, ship it.</div>
+    <div class="next-cta-row">
+      <button class="bs back-btn" onclick="go(3)">← ${cfg.tabs[3]}</button>
+      <button class="bg next-btn" onclick="doExport()">Export Final Script ↓</button>
     </div>
   </div>
 </div></div>`;}
@@ -1727,22 +1785,49 @@ function toggleDiscuss(roomId){
   if(!w)return;
   const wasOpen=w.classList.contains('open');
   w.classList.toggle('open');
-  // First open with an empty thread: AI kicks off with clarifying questions
+  // First open with an empty thread: AI streams its clarifying questions one at a time
   if(!wasOpen&&DISCUSS[roomId].length===0){
-    pushDiscussMsg(roomId,'ai',DISCUSS_KICKOFF[roomId]);
-    DISCUSS[roomId].push({role:'assistant',content:DISCUSS_KICKOFF[roomId]});
-    // Persist so the kickoff doesn't repeat after a sign-out/refresh.
-    S.discuss={story:DISCUSS.story.slice(),beats:DISCUSS.beats.slice(),script:DISCUSS.script.slice()};
-    scheduleSave();
+    _runKickoff(roomId);
   }
   if(!wasOpen){
     setTimeout(()=>{
-      const input=document.getElementById('dinput-'+roomId);
-      input?.focus();
       const th=document.getElementById('dthread-'+roomId);
       if(th)th.scrollTop=th.scrollHeight;
     },240);
   }
+}
+
+// Reveals each kickoff line as its own AI message bubble with a typing-dots pause between.
+// The user sees the AI thinking and arriving at each question, not dumping a prepared list.
+async function _runKickoff(roomId){
+  const chunks=Array.isArray(DISCUSS_KICKOFF[roomId])?DISCUSS_KICKOFF[roomId]:[DISCUSS_KICKOFF[roomId]];
+  const th=document.getElementById('dthread-'+roomId);
+  if(!th)return;
+  // Disable the input so users don't jump in mid-kickoff and confuse the sequence.
+  const input=document.getElementById('dinput-'+roomId);
+  const send=document.getElementById('dsend-'+roomId);
+  if(input)input.disabled=true;
+  if(send)send.disabled=true;
+  for(let i=0;i<chunks.length;i++){
+    const txt=chunks[i];
+    // Show typing dots before each chunk — pause feels like the AI is thinking.
+    const typing=document.createElement('div');
+    typing.className='dmsg ai discuss-typing';
+    typing.innerHTML=`<div class="dmsg-tag">AI Collaborator</div><span class="dot-typing"><span></span><span></span><span></span></span>`;
+    th.appendChild(typing);
+    th.scrollTop=th.scrollHeight;
+    // Pause length scales with chunk length — short lines come quicker, long lines linger.
+    const pauseMs=Math.min(420+txt.length*14,1500);
+    await new Promise(r=>setTimeout(r,pauseMs));
+    typing.remove();
+    pushDiscussMsg(roomId,'ai',txt);
+    DISCUSS[roomId].push({role:'assistant',content:txt});
+  }
+  if(input){input.disabled=false;input.focus();}
+  if(send)send.disabled=false;
+  // Persist the full kickoff so it doesn't replay on sign-in.
+  S.discuss={story:DISCUSS.story.slice(),beats:DISCUSS.beats.slice(),script:DISCUSS.script.slice()};
+  scheduleSave();
 }
 function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
 function onDiscussKey(ev,roomId){
